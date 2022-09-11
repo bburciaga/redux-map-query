@@ -1,14 +1,19 @@
 import { useSelector } from "react-redux";
 import { selectUserBound } from "../../../state/reducers/userBound";
 import { GeoJSON } from "react-leaflet";
+import { selectBufferedExtents } from "../../../state/reducers/bufferedExtent";
 
 export const Renders = () => {
-  const { data } = useSelector(selectUserBound);
+  const userBound = useSelector(selectUserBound);
+  const bufferedExtents = useSelector(selectBufferedExtents);
 
   return (
     <>
-      {data && (
-        <GeoJSON data={data} key={Math.random()} style={{ color: "red" }} />
+      {userBound.initialized && (
+        <GeoJSON data={userBound.data} key={Math.random()} style={{ color: "red" }} />
+      )}
+      {bufferedExtents.initialized && (
+        <GeoJSON data={bufferedExtents.data} key={Math.random()} />
       )}
     </>
   );

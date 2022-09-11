@@ -1,4 +1,6 @@
-class BufferedExtentState {
+import { BUFFERED_EXTENTS_INITIALIZE } from "../actions";
+
+class BufferedExtentsState {
   initialized: boolean;
   data: any;
 
@@ -7,21 +9,33 @@ class BufferedExtentState {
     this.data = null;
   }
 }
-const initialState = new BufferedExtentState();
+const initialState = new BufferedExtentsState();
 
-function createBufferedExtentReducer(): (
+function createBufferedExtentsReducer(): (
   BufferedExtentState: any,
   AnyAction: any
-) => BufferedExtentState {
+) => BufferedExtentsState {
   return (state = initialState, action) => {
     switch (action.type) {
+      case BUFFERED_EXTENTS_INITIALIZE: {
+        return {
+          ...state,
+          initialized: true,
+          data: {
+            type: 'FeatureCollection',
+            features: [
+              action.payload.feature
+            ]
+          }
+        }
+      }
       default:
         return state;
     }
   };
 }
 
-const selectBufferedExtent: (state: any) => BufferedExtentState = (state) =>
-  state.bufferedExtent;
+const selectBufferedExtents: (state: any) => BufferedExtentsState = (state) =>
+  state.bufferedExtents;
 
-export { createBufferedExtentReducer, selectBufferedExtent };
+export { createBufferedExtentsReducer, selectBufferedExtents };

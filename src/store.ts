@@ -5,13 +5,13 @@ import {
 } from "@reduxjs/toolkit";
 import { createUserBoundReducer } from "./state/reducers/userBound";
 import logger from "redux-logger";
-import { createBufferedExtentReducer } from "./state/reducers/bufferedExtent";
+import { createBufferedExtentsReducer } from "./state/reducers/bufferedExtent";
 
 export const setupStore = () => {
   const store = createStore(
     combineReducers({
       userBound: createUserBoundReducer(),
-      bufferedExtent: createBufferedExtentReducer(),
+      bufferedExtents: createBufferedExtentsReducer(),
     }),
     applyMiddleware(logger)
   );

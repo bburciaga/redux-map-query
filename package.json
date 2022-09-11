@@ -22,6 +22,7 @@
     "@types/react": "16.14.28",
     "@types/react-redux": "^7.1.24",
     "@types/redux-logger": "^3.0.9",
+    "@types/redux-saga": "^0.10.5",
     "axios": "^0.27.2",
     "leaflet": "1.7.1",
     "mui": "0.0.1",
@@ -32,7 +33,9 @@
     "react-redux": "^8.0.2",
     "react-scripts": "^5.0.0",
     "redux-logger": "^3.0.6",
+    "redux-saga": "^1.2.1",
     "reproject": "^1.2.6",
+    "turf": "^3.0.14",
     "wkt": "^0.1.1"
   },
   "devDependencies": {
