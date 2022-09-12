@@ -1,4 +1,4 @@
-import { BUFFERED_EXTENTS_INITIALIZE } from "../actions";
+import { BUFFERED_EXTENTS_INITIALIZE, BUFFERED_EXTENTS_UPDATE_SUCCESS } from "../actions";
 
 class BufferedExtentsState {
   initialized: boolean;
@@ -27,6 +27,11 @@ function createBufferedExtentsReducer(): (
               action.payload.feature
             ]
           }
+        }
+      }
+      case BUFFERED_EXTENTS_UPDATE_SUCCESS: {
+        return {
+          
         }
       }
       default:

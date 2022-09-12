@@ -1,11 +1,11 @@
-import { difference, intersect, multiPolygon } from "@turf/turf";
+import { difference, intersect } from "@turf/turf";
 import { useMap, useMapEvent } from "react-leaflet";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { createExtent, createUserGeo, getClosestExtent } from "../../../helpers/geometry";
+import { createExtent, createUserGeo, getClosestExtent, getDirectionFromBound } from "../../../helpers/geometry";
 import {
   BUFFERED_EXTENTS_INITIALIZE,
-  BUFFERED_EXTENTS_UPDATE,
+  BUFFERED_EXTENTS_UPDATE_REQUEST,
   USER_BOUND_INITIALIZE,
   USER_BOUND_UPDATE_ON_MOVE,
   USER_BOUND_UPDATE_ON_ZOOM,
@@ -20,7 +20,7 @@ export const Renders = () => {
   const bufferedExtents = useSelector(selectBufferedExtents);
 
   useMapEvent("zoomend", (_e) => {
-    if (map.getZoom() > 9) {
+    if (map.getZoom() > 8) {
       /* User Bound Actions */
       const tempBounds = map.getBounds();
       const userGeo = createUserGeo(tempBounds);
@@ -54,33 +54,45 @@ export const Renders = () => {
   });
 
   useMapEvent("moveend", (_e) => {
-    if (map.getZoom() > 9) {
+    if (map.getZoom() > 8) {
+      const userGeo = createUserGeo(map.getBounds());
+      /* User Bound */      
+      if (userBound.initialized) {
+        dispatch({
+          type: USER_BOUND_UPDATE_ON_MOVE,
+          payload: {
+            feature: userGeo
+          }
+        });
+      }
+      
+      /* Buffered Extents */
       if (bufferedExtents.initialized) {
         const tempExtents = bufferedExtents.data.features;
         const intersects: any[] = [];
+        const userCenter = map.getCenter();
 
         tempExtents.forEach((extent: any) => {
-          if (intersect(userBound.data, extent)) {
+          if (intersect(userGeo, extent)) {
             intersects.push(extent);
           }
         })
-        console.log(getClosestExtent(map.getCenter(), tempExtents));
 
-        switch (intersect.length) {
+        switch (intersects.length) {
           case 0:
-            const closestExtent: any = getClosestExtent(map.getCenter(), tempExtents);
-            // const direction: string = getCenterFromBound(aGeo, closestBuffer);
-            // const newBuffer: any = createBuffer(
-            //   closestBuffer.properties.center,
-            //   direction
-            // );
+            const closestExtent: any = getClosestExtent(userCenter, tempExtents);
+            const direction: string = getDirectionFromBound(userCenter, closestExtent);
+            const newExtent: any = createExtent(
+              closestExtent.properties.center,
+              direction
+            );
 
             dispatch({
-              type: BUFFERED_EXTENTS_UPDATE,
+              type: BUFFERED_EXTENTS_UPDATE_REQUEST,
               payload: {
-                data: 'coolguy'
+                data: newExtent
               }
-            })
+            });
             break;
           case 1:
             break;
@@ -89,12 +101,6 @@ export const Renders = () => {
           case 3:
             break;
         }
-        // dispatch({
-        //   type: USER_BOUND_UPDATE_ON_MOVE,
-        //   payload: {
-        //     feature: createPolygonFromBoundsObject(map.getBounds()),
-        //   },
-        // });
       }
     }
   });

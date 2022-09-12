@@ -6,14 +6,19 @@ import {
 import { createUserBoundReducer } from "./state/reducers/userBound";
 import logger from "redux-logger";
 import { createBufferedExtentsReducer } from "./state/reducers/bufferedExtent";
+import createSagaMiddleware from "@redux-saga/core";
 
 export const setupStore = () => {
+  // const sagaMiddleware = createSagaMiddleware();
+
+  const middlewares = applyMiddleware(logger);
+
   const store = createStore(
     combineReducers({
       userBound: createUserBoundReducer(),
       bufferedExtents: createBufferedExtentsReducer(),
     }),
-    applyMiddleware(logger)
+    middlewares
   );
 
   return store;
