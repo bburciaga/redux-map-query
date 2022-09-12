@@ -24,14 +24,19 @@ function createBufferedExtentsReducer(): (
           data: {
             type: 'FeatureCollection',
             features: [
-              action.payload.feature
+              action.payload.extentGeoJSON
             ]
           }
         }
       }
       case BUFFERED_EXTENTS_UPDATE_SUCCESS: {
+        console.log('succeeding');
         return {
-          
+          ...state,
+          data: {
+            type: 'FeatureCollection',
+            features: action.payload.extents
+          }
         }
       }
       default:

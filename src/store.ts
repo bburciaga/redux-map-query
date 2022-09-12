@@ -5,13 +5,14 @@ import {
 } from "@reduxjs/toolkit";
 import { createUserBoundReducer } from "./state/reducers/userBound";
 import logger from "redux-logger";
-import { createBufferedExtentsReducer } from "./state/reducers/bufferedExtent";
+import { createBufferedExtentsReducer } from "./state/reducers/bufferedExtents";
 import createSagaMiddleware from "@redux-saga/core";
+import bufferedExtentsSaga from "./state/sagas/bufferedExtents";
+
+const sagaMiddlewares = createSagaMiddleware();
 
 export const setupStore = () => {
-  // const sagaMiddleware = createSagaMiddleware();
-
-  const middlewares = applyMiddleware(logger);
+  const middlewares = applyMiddleware(sagaMiddlewares, logger);
 
   const store = createStore(
     combineReducers({
@@ -20,6 +21,8 @@ export const setupStore = () => {
     }),
     middlewares
   );
+
+  sagaMiddlewares.run(bufferedExtentsSaga);
 
   return store;
 };

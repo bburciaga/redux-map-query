@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { selectUserBound } from "../../../state/reducers/userBound";
 import { GeoJSON } from "react-leaflet";
-import { selectBufferedExtents } from "../../../state/reducers/bufferedExtent";
+import { selectBufferedExtents } from "../../../state/reducers/bufferedExtents";
 
 export const Renders = () => {
   const userBound = useSelector(selectUserBound);

@@ -25,14 +25,14 @@ function createUserBoundReducer(): (
         return {
           ...state,
           initialized: true,
-          data: action.payload.feature,
+          data: action.payload.userGeoJSON,
         };
       }
       case USER_BOUND_UPDATE_ON_MOVE:
       case USER_BOUND_UPDATE_ON_ZOOM: {
         return {
           ...state,
-          data: action.payload.feature,
+          data: action.payload.userGeoJSON,
         };
       }
       default:

@@ -5,12 +5,12 @@ import { useDispatch } from "react-redux";
 import { createExtent, createUserGeo, getClosestExtent, getDirectionFromBound } from "../../../helpers/geometry";
 import {
   BUFFERED_EXTENTS_INITIALIZE,
-  BUFFERED_EXTENTS_UPDATE_REQUEST,
+  BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS_REQUEST,
   USER_BOUND_INITIALIZE,
   USER_BOUND_UPDATE_ON_MOVE,
   USER_BOUND_UPDATE_ON_ZOOM,
 } from "../../../state/actions";
-import { selectBufferedExtents } from "../../../state/reducers/bufferedExtent";
+import { selectBufferedExtents } from "../../../state/reducers/bufferedExtents";
 import { selectUserBound } from "../../../state/reducers/userBound";
 
 export const Renders = () => {
@@ -29,14 +29,14 @@ export const Renders = () => {
         dispatch({
           type: USER_BOUND_INITIALIZE,
           payload: {
-            feature: userGeo
+            userGeoJSON: userGeo
           },
         });
       } else {
         dispatch({
           type: USER_BOUND_UPDATE_ON_ZOOM,
           payload: {
-            feature: userGeo
+            userGeoJSON: userGeo
           },
         });
       }
@@ -46,7 +46,7 @@ export const Renders = () => {
         dispatch({
           type: BUFFERED_EXTENTS_INITIALIZE,
           payload: {
-            feature: createExtent(map.getCenter()), // create bound from center
+            extentGeoJSON: createExtent(map.getCenter()), // create bound from center
           },
         });
       } 
@@ -61,7 +61,7 @@ export const Renders = () => {
         dispatch({
           type: USER_BOUND_UPDATE_ON_MOVE,
           payload: {
-            feature: userGeo
+            userGeoJSON: userGeo
           }
         });
       }
@@ -80,17 +80,11 @@ export const Renders = () => {
 
         switch (intersects.length) {
           case 0:
-            const closestExtent: any = getClosestExtent(userCenter, tempExtents);
-            const direction: string = getDirectionFromBound(userCenter, closestExtent);
-            const newExtent: any = createExtent(
-              closestExtent.properties.center,
-              direction
-            );
-
             dispatch({
-              type: BUFFERED_EXTENTS_UPDATE_REQUEST,
+              type: BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS_REQUEST,
               payload: {
-                data: newExtent
+                userCenter: userCenter,
+                extents: tempExtents
               }
             });
             break;
