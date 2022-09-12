@@ -7,7 +7,7 @@ const width = 1.135711669921875;
 /**
  * Used to generate array of numbers to be used for rectangle GeoJSON object
  * @param center position of map or GeoJSON object
- * @returns number [][][] 
+ * @returns number [][][]
  */
 function createBoundFromCenter(center: { lat: number; lng: number }) {
   return [
@@ -71,6 +71,28 @@ function createPolygonFromArray(
 }
 
 /**
+ * used in association with the createExtent function in case there is two directions
+ * (e.g. nw, ne, sw, se)
+ * @param direction string to indicate where to put next extent
+ * @param newCenter to be used for next extent when creating polygon
+ * @returns { lat: number, lng: number }
+ */
+function createExtentHelper(
+  direction: string,
+  newCenter: { lat: number; lng: number }
+) {
+  if (direction.length > 1) {
+    if (direction.charAt(1) === "e") {
+      newCenter.lng = newCenter.lng + 2 * width;
+    }
+    if (direction.charAt(1) === "w") {
+      newCenter.lng = newCenter.lng - 2 * width;
+    }
+  }
+  return newCenter;
+}
+
+/**
  * Creates a new extent for the bufferedExtents
  * @param center position to base next extent off of
  * @param direction (optional) to indicate where to put next extent
@@ -85,12 +107,18 @@ function createExtent(
     const firstChar = direction.charAt(0);
     switch (firstChar) {
       case "n":
+        newCenter = { lat: center.lat + 2 * length, lng: center.lng };
+        newCenter = createExtentHelper(direction, newCenter);
         break;
       case "s":
+        newCenter = { lat: center.lat - 2 * length, lng: center.lng };
+        newCenter = createExtentHelper(direction, newCenter);
         break;
       case "e":
+        newCenter = { lat: center.lat, lng: center.lng + 2 * width };
         break;
       case "w":
+        newCenter = { lat: center.lat, lng: center.lng - 2 * width };
         break;
     }
   }
@@ -98,35 +126,49 @@ function createExtent(
   const tempBound: any = createBoundFromCenter(newCenter);
 
   const tempGeo = createPolygonFromArray(tempBound, newCenter);
-  
-  tempGeo.properties.northEast = { lat: center.lat + length, lng: center.lng + width };
-  tempGeo.properties.southWest = { lat: center.lat - length, lng: center.lng - width };
 
   return tempGeo;
 }
 
-function getClosestExtent(userCenter: { lat: number, lng: number }, extents: any[]) {
+function getNextExtent(userGeo: any, extentGeo: any) {
+  if (extentGeo.properties.northEast.lat < userGeo.properties.northEast.lat) {
+    return createExtent(extentGeo.properties.center, "n");
+  }
+  if (extentGeo.properties.northEast.lng < userGeo.properties.northEast.lng) {
+    return createExtent(extentGeo.properties.center, "e");
+  }
+  if (extentGeo.properties.southWest.lat > userGeo.properties.southWest.lat) {
+    return createExtent(extentGeo.properties.center, "s");
+  }
+  if (extentGeo.properties.southWest.lng > userGeo.properties.southWest.lng) {
+    return createExtent(extentGeo.properties.center, "w");
+  }
+}
+
+function getClosestExtent(
+  userCenter: { lat: number; lng: number },
+  extents: any[]
+) {
   let closestDistance: number = -1;
   let closestFeature: any;
 
-
-  extents.forEach((buffer: any) => {
-    const bCenter = buffer.properties.center;
+  extents.forEach((extent: any) => {
+    const eCenter = extent.properties.center;
     if (!closestFeature) {
       closestDistance = distance(
-        [bCenter.lng, bCenter.lat],
+        [eCenter.lng, eCenter.lat],
         [userCenter.lng, userCenter.lat]
       );
-      closestFeature = buffer;
+      closestFeature = extent;
     }
     if (closestFeature) {
       const tempDistance = distance(
-        [bCenter.lng, bCenter.lat],
+        [eCenter.lng, eCenter.lat],
         [userCenter.lng, userCenter.lat]
       );
       if (tempDistance < closestDistance) {
         closestDistance = tempDistance;
-        closestFeature = buffer;
+        closestFeature = extent;
       }
     }
   });
@@ -134,53 +176,66 @@ function getClosestExtent(userCenter: { lat: number, lng: number }, extents: any
   return closestFeature;
 }
 
-function getDirectionFromCenter (aCenter: { lat: number, lng: number }, extents: any[]) {
-    const multiPoly: any = multiPolygon(
-      extents.map((item: any) => {
-        return item.geometry.coordinates;
-      })
-    );
-    const tempCenter: any = center(multiPoly).geometry.coordinates;
-    const mpCenter = { lat: tempCenter[1], lng: tempCenter[0] };
+function getDirectionFromCenter(
+  aCenter: { lat: number; lng: number },
+  extents: any[]
+) {
+  const multiPoly: any = multiPolygon(
+    extents.map((item: any) => {
+      return item.geometry.coordinates;
+    })
+  );
+  const tempCenter: any = center(multiPoly).geometry.coordinates;
+  const mpCenter = { lat: tempCenter[1], lng: tempCenter[0] };
 
-    let direction: string = "";
+  let direction: string = "";
 
-    if (aCenter.lat > mpCenter.lat) {
-      direction += "n";
-    }
-    if (aCenter.lat < mpCenter.lat) {
-      direction += "s";
-    }
-    if (aCenter.lng > mpCenter.lng) {
-      direction += "e";
-    }
-    if (aCenter.lng < mpCenter.lng) {
-      direction += "w";
-    }
+  if (aCenter.lat > mpCenter.lat) {
+    direction += "n";
+  }
+  if (aCenter.lat < mpCenter.lat) {
+    direction += "s";
+  }
+  if (aCenter.lng > mpCenter.lng) {
+    direction += "e";
+  }
+  if (aCenter.lng < mpCenter.lng) {
+    direction += "w";
+  }
 
-    return direction;
+  return direction;
 }
 
-function getDirectionFromBound (aCenter: { lat: number, lng: number }, aGeo: any) {
-    const cbNE = aGeo.properties.northEast;
-    const cbSW = aGeo.properties.southWest;
+function getDirectionFromBound(
+  aCenter: { lat: number; lng: number },
+  aGeo: any
+) {
+  const cbNE = aGeo.properties.northEast;
+  const cbSW = aGeo.properties.southWest;
 
-    let direction = "";
+  let direction = "";
 
-    if (aCenter.lat > cbNE.lat) {
-      direction += "n";
-    }
-    if (aCenter.lat < cbSW.lat) {
-      direction += "s";
-    }
-    if (aCenter.lng > cbNE.lng) {
-      direction += "e";
-    }
-    if (aCenter.lng < cbSW.lng) {
-      direction += "w";
-    }
+  if (aCenter.lat > cbNE.lat) {
+    direction += "n";
+  }
+  if (aCenter.lat < cbSW.lat) {
+    direction += "s";
+  }
+  if (aCenter.lng > cbNE.lng) {
+    direction += "e";
+  }
+  if (aCenter.lng < cbSW.lng) {
+    direction += "w";
+  }
 
-    return direction;
+  return direction;
 }
 
-export { createUserGeo, createExtent, getClosestExtent, getDirectionFromBound };
+export {
+  createUserGeo,
+  createExtent,
+  getNextExtent,
+  getClosestExtent,
+  getDirectionFromBound,
+  getDirectionFromCenter,
+};
