@@ -12,10 +12,14 @@ import {
   getDirectionFromBound,
   getDirectionFromCenter,
   getNextExtent,
+  removeFurthestExtent,
 } from "../../helpers/geometry";
 import { center, difference, multiPolygon } from "@turf/turf";
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
+  const { userCenter, extents } = action.payload;
+  const updatedExtents = removeFurthestExtent(userCenter, extents);
+
   const closestExtent: any = getClosestExtent(
     action.payload.userCenter,
     action.payload.extents
@@ -31,28 +35,28 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
 
   yield put({
     type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
-    payload: { extents: [...action.payload.extents, newExtent] },
+    payload: { extents: [...updatedExtents, newExtent] },
   });
 }
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
+  const { aGeo, intersects, extents } = action.payload;
+  const updatedExtents = removeFurthestExtent(aGeo.properties.center, extents);
+
   const intersectsMultiPoly: any = multiPolygon(
-    action.payload.intersects.map((feature: any) => {
+    intersects.map((feature: any) => {
       return feature.geometry.coordinates;
     })
   );
 
   if (difference(action.payload.aGeo, intersectsMultiPoly)) {
-    const closestExtent = getClosestExtent(
-      action.payload.aGeo,
-      action.payload.extents
-    );
+    const closestExtent = getClosestExtent(aGeo, updatedExtents);
     const newExtent = getNextExtent(action.payload.aGeo, closestExtent);
 
     yield put({
       type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
       payload: {
-        extents: [...action.payload.extents, newExtent],
+        extents: [...updatedExtents, newExtent],
       },
     });
   }
@@ -60,72 +64,77 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
   const { aGeo, intersects, extents } = action.payload;
+  const updatedExtents = removeFurthestExtent(aGeo.properties.center, extents);
+
   const intersectsMultiPoly: any = multiPolygon(
     intersects.map((feature: any) => {
       return feature.geometry.coordinates;
     })
   );
 
-  const closestExtent = getClosestExtent(aGeo.properties.center, intersects);
+  if (difference(aGeo, intersectsMultiPoly)) {
+    const closestExtent = getClosestExtent(aGeo.properties.center, intersects);
 
-  intersectsMultiPoly.properties.center = {
-    lat: center(intersectsMultiPoly).geometry.coordinates[1],
-    lng: center(intersectsMultiPoly).geometry.coordinates[0],
-  };
-  // get difference for check
-  const diff = difference(aGeo, intersectsMultiPoly);
+    intersectsMultiPoly.properties.center = {
+      lat: center(intersectsMultiPoly).geometry.coordinates[1],
+      lng: center(intersectsMultiPoly).geometry.coordinates[0],
+    };
+    // get difference for check
+    const diff = difference(aGeo, intersectsMultiPoly);
 
-  const diffCenter: any = diff
-    ? {
-        lat: center(diff).geometry.coordinates[1],
-        lng: center(diff).geometry.coordinates[0],
-      }
-    : null;
+    const diffCenter: any = diff
+      ? {
+          lat: center(diff).geometry.coordinates[1],
+          lng: center(diff).geometry.coordinates[0],
+        }
+      : null;
 
-  let newExtent: any;
-  // check north
-  if (
-    diffCenter &&
-    diffCenter.lat > intersectsMultiPoly.properties.center.lat &&
-    diffCenter.lat > closestExtent.properties.center.lat
-  ) {
-    newExtent = createExtent(closestExtent.properties.center, "n");
-  }
-  // check south
-  if (
-    diffCenter &&
-    diffCenter.lat < intersectsMultiPoly.properties.center.lat &&
-    diffCenter.lat < closestExtent.properties.center.lat
-  ) {
-    newExtent = createExtent(closestExtent.properties.center, "s");
-  }
-  // check east
-  if (
-    diffCenter &&
-    diffCenter.lng > intersectsMultiPoly.properties.center.lng &&
-    diffCenter.lng > closestExtent.properties.center.lng
-  ) {
-    newExtent = createExtent(closestExtent.properties.center, "e");
-  }
-  // check west
-  if (
-    diffCenter &&
-    diffCenter.lng < intersectsMultiPoly.properties.center.lng &&
-    diffCenter.lng < closestExtent.properties.center.lng
-  ) {
-    newExtent = createExtent(closestExtent.properties.center, "w");
-  }
+    let newExtent: any;
+    // check north
+    if (
+      diffCenter &&
+      diffCenter.lat > intersectsMultiPoly.properties.center.lat &&
+      diffCenter.lat > closestExtent.properties.center.lat
+    ) {
+      newExtent = createExtent(closestExtent.properties.center, "n");
+    }
+    // check south
+    if (
+      diffCenter &&
+      diffCenter.lat < intersectsMultiPoly.properties.center.lat &&
+      diffCenter.lat < closestExtent.properties.center.lat
+    ) {
+      newExtent = createExtent(closestExtent.properties.center, "s");
+    }
+    // check east
+    if (
+      diffCenter &&
+      diffCenter.lng > intersectsMultiPoly.properties.center.lng &&
+      diffCenter.lng > closestExtent.properties.center.lng
+    ) {
+      newExtent = createExtent(closestExtent.properties.center, "e");
+    }
+    // check west
+    if (
+      diffCenter &&
+      diffCenter.lng < intersectsMultiPoly.properties.center.lng &&
+      diffCenter.lng < closestExtent.properties.center.lng
+    ) {
+      newExtent = createExtent(closestExtent.properties.center, "w");
+    }
 
-  yield put({
-    type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
-    payload: {
-      extents: [...extents, newExtent],
-    },
-  });
+    yield put({
+      type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
+      payload: {
+        extents: [...updatedExtents, newExtent],
+      },
+    });
+  }
 }
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
   const { aGeo, intersects, extents } = action.payload;
+  const updatedExtents = removeFurthestExtent(aGeo.properties.center, extents);
   // check where each geo is
   const tempExtents: any[] = [];
   intersects.forEach((feature: any) => {
@@ -193,7 +202,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
   yield put({
     type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
     payload: {
-      extents: [...extents, newExtent],
+      extents: [...updatedExtents, newExtent],
     },
   });
 }

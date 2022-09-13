@@ -1,4 +1,10 @@
-import { center, distance, multiPolygon, polygon } from "@turf/turf";
+import {
+  center,
+  difference,
+  distance,
+  multiPolygon,
+  polygon,
+} from "@turf/turf";
 import L, { LatLngBounds } from "leaflet";
 
 const length = 0.745201235056549;
@@ -231,6 +237,34 @@ function getDirectionFromBound(
   return direction;
 }
 
+function removeFurthestExtent(
+  center: { lat: number; lng: number },
+  extents: any[]
+) {
+  const tempExtents = extents;
+  if (tempExtents.length > 4) {
+    let furthestDistance = -1;
+    let index = -1;
+
+    for (let i = 0; i < tempExtents.length; i++) {
+      const tempCenter = tempExtents[0].properties.center;
+      const tempDistance = distance(
+        [tempCenter.lng, tempCenter.lat],
+        [center.lng, center.lat]
+      );
+      if (furthestDistance < tempDistance) {
+        furthestDistance = tempDistance;
+        index = i;
+      }
+    }
+
+    if (index > -1) {
+      tempExtents.splice(index, 1);
+    }
+  }
+  return tempExtents;
+}
+
 export {
   createUserGeo,
   createExtent,
@@ -238,4 +272,5 @@ export {
   getClosestExtent,
   getDirectionFromBound,
   getDirectionFromCenter,
+  removeFurthestExtent,
 };
