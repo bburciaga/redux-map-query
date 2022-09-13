@@ -8,6 +8,8 @@ import logger from "redux-logger";
 import { createBufferedExtentsReducer } from "./state/reducers/bufferedExtents";
 import createSagaMiddleware from "@redux-saga/core";
 import bufferedExtentsSaga from "./state/sagas/bufferedExtents";
+import { createCachedDataReducer } from "./state/reducers/cachedData";
+import cachedDataSaga from "./state/sagas/cachedData";
 
 const sagaMiddlewares = createSagaMiddleware();
 
@@ -18,11 +20,13 @@ export const setupStore = () => {
     combineReducers({
       userBound: createUserBoundReducer(),
       bufferedExtents: createBufferedExtentsReducer(),
+      cachedData: createCachedDataReducer(),
     }),
     middlewares
   );
 
   sagaMiddlewares.run(bufferedExtentsSaga);
+  sagaMiddlewares.run(cachedDataSaga);
 
   return store;
 };

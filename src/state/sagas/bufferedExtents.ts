@@ -42,9 +42,12 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
   const { aGeo, intersects, extents } = action.payload;
-  const updatedExtents = removeFurthestExtent(aGeo.properties.center, extents);
 
   if (difference(action.payload.aGeo, intersects[0])) {
+    const updatedExtents = removeFurthestExtent(
+      aGeo.properties.center,
+      extents
+    );
     const closestExtent = getClosestExtent(
       aGeo.properties.center,
       updatedExtents
@@ -63,7 +66,6 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
   const { aGeo, intersects, extents } = action.payload;
-  const updatedExtents = removeFurthestExtent(aGeo.properties.center, extents);
 
   const intersectsMultiPoly: any = multiPolygon(
     intersects.map((feature: any) => {
@@ -72,6 +74,10 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
   );
 
   if (difference(aGeo, intersectsMultiPoly)) {
+    const updatedExtents = removeFurthestExtent(
+      aGeo.properties.center,
+      extents
+    );
     const closestExtent = getClosestExtent(aGeo.properties.center, intersects);
 
     intersectsMultiPoly.properties.center = {
@@ -136,80 +142,92 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
   const { aGeo, intersects, extents } = action.payload;
-  const updatedExtents = removeFurthestExtent(aGeo.properties.center, extents);
 
-  // check where each geo is
-  const tempExtents: any[] = [];
-  intersects.forEach((feature: any) => {
-    feature.properties.direction = getDirectionFromCenter(
-      feature.properties.center,
-      [aGeo]
+  const intersectsMultiPoly: any = multiPolygon(
+    intersects.map((feature: any) => {
+      return feature.geometry.coordinates;
+    })
+  );
+
+  if (difference(aGeo, intersectsMultiPoly)) {
+    const updatedExtents = removeFurthestExtent(
+      aGeo.properties.center,
+      extents
     );
-    if (feature.properties.direction) tempExtents.push(feature);
-  });
 
-  let adjacent: any;
-
-  const coolstring =
-    "" +
-    tempExtents.map((b: any) => {
-      return b.properties.direction;
+    // check where each geo is
+    const tempExtents: any[] = [];
+    intersects.forEach((feature: any) => {
+      feature.properties.direction = getDirectionFromCenter(
+        feature.properties.center,
+        [aGeo]
+      );
+      if (feature.properties.direction) tempExtents.push(feature);
     });
 
-  const assignAdjacent = (direction1: string, direction2: string) => {
-    tempExtents.forEach((e: any) => {
-      if (
-        e.properties.direction === direction1 ||
-        e.properties.direction === direction2
-      ) {
-        adjacent = e;
+    let adjacent: any;
+
+    const coolstring =
+      "" +
+      tempExtents.map((b: any) => {
+        return b.properties.direction;
+      });
+
+    const assignAdjacent = (direction1: string, direction2: string) => {
+      tempExtents.forEach((e: any) => {
+        if (
+          e.properties.direction === direction1 ||
+          e.properties.direction === direction2
+        ) {
+          adjacent = e;
+        }
+      });
+    };
+
+    const getNextExtent = (direction: string) => {
+      if (adjacent.properties.direction.includes("n")) {
+        return createExtent(
+          adjacent.properties.center,
+          direction[0] === "n" ? direction[1] : direction[0]
+        );
       }
-    });
-  };
+      if (adjacent.properties.direction.includes("s")) {
+        return createExtent(
+          adjacent.properties.center,
+          direction[0] === "s" ? direction[1] : direction[0]
+        );
+      }
+    };
 
-  const getNextExtent = (direction: string) => {
-    if (adjacent.properties.direction.includes("n")) {
-      return createExtent(
-        adjacent.properties.center,
-        direction[0] === "n" ? direction[1] : direction[0]
-      );
+    let newExtent: any;
+
+    // once all geos are obtained check where to put the next geometry
+    if (!coolstring.includes("ne")) {
+      assignAdjacent("nw", "se");
+      newExtent = getNextExtent("ne");
     }
-    if (adjacent.properties.direction.includes("s")) {
-      return createExtent(
-        adjacent.properties.center,
-        direction[0] === "s" ? direction[1] : direction[0]
-      );
+    if (!coolstring.includes("nw")) {
+      assignAdjacent("ne", "sw");
+      newExtent = getNextExtent("nw");
     }
-  };
+    if (!coolstring.includes("se")) {
+      assignAdjacent("ne", "sw");
+      newExtent = getNextExtent("se");
+    }
+    if (!coolstring.includes("sw")) {
+      assignAdjacent("nw", "se");
+      newExtent = getNextExtent("sw");
+    }
 
-  let newExtent: any;
-
-  // once all geos are obtained check where to put the next geometry
-  if (!coolstring.includes("ne")) {
-    assignAdjacent("nw", "se");
-    newExtent = getNextExtent("ne");
-  }
-  if (!coolstring.includes("nw")) {
-    assignAdjacent("ne", "sw");
-    newExtent = getNextExtent("nw");
-  }
-  if (!coolstring.includes("se")) {
-    assignAdjacent("ne", "sw");
-    newExtent = getNextExtent("se");
-  }
-  if (!coolstring.includes("sw")) {
-    assignAdjacent("nw", "se");
-    newExtent = getNextExtent("sw");
-  }
-
-  if (newExtent) {
-    yield put({
-      type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
-      payload: {
-        features: [...updatedExtents, newExtent],
-        fetch_geo: newExtent,
-      },
-    });
+    if (newExtent) {
+      yield put({
+        type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
+        payload: {
+          features: [...updatedExtents, newExtent],
+          fetch_geo: newExtent,
+        },
+      });
+    }
   }
 }
 

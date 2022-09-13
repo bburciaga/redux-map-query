@@ -76,26 +76,18 @@ function createPolygonFromArray(
   return aGeo;
 }
 
-/**
- * used in association with the createExtent function in case there is two directions
- * (e.g. nw, ne, sw, se)
- * @param direction string to indicate where to put next extent
- * @param newCenter to be used for next extent when creating polygon
- * @returns { lat: number, lng: number }
- */
-function createExtentHelper(
-  direction: string,
-  newCenter: { lat: number; lng: number }
-) {
-  if (direction.length > 1) {
-    if (direction.charAt(1) === "e") {
-      newCenter.lng = newCenter.lng + 2 * width;
-    }
-    if (direction.charAt(1) === "w") {
-      newCenter.lng = newCenter.lng - 2 * width;
-    }
+function getNewCenter(center: { lat: number; lng: number }, direction: string) {
+  switch (direction[0]) {
+    case "n":
+      return { lat: center.lat + 2 * length, lng: center.lng };
+    case "s":
+      return { lat: center.lat - 2 * length, lng: center.lng };
+    case "e":
+      return { lat: center.lat, lng: center.lng + 2 * width };
+    case "w":
+      return { lat: center.lat, lng: center.lng - 2 * width };
   }
-  return newCenter;
+  return center;
 }
 
 /**
@@ -110,23 +102,9 @@ function createExtent(
 ) {
   let newCenter: { lat: number; lng: number } = center;
   if (direction) {
-    const firstChar = direction.charAt(0);
-    switch (firstChar) {
-      case "n":
-        newCenter = { lat: center.lat + 2 * length, lng: center.lng };
-        newCenter = createExtentHelper(direction, newCenter);
-        break;
-      case "s":
-        newCenter = { lat: center.lat - 2 * length, lng: center.lng };
-        newCenter = createExtentHelper(direction, newCenter);
-        break;
-      case "e":
-        newCenter = { lat: center.lat, lng: center.lng + 2 * width };
-        break;
-      case "w":
-        newCenter = { lat: center.lat, lng: center.lng - 2 * width };
-        break;
-    }
+    newCenter = getNewCenter(center, direction);
+    if (direction.length > 1)
+      newCenter = getNewCenter(newCenter, direction.charAt(1));
   }
 
   const tempBound: any = createBoundFromCenter(newCenter);
@@ -137,18 +115,31 @@ function createExtent(
 }
 
 function getNextExtent(userGeo: any, extentGeo: any) {
+  const tempArr = [];
   if (extentGeo.properties.northEast.lat < userGeo.properties.northEast.lat) {
-    return createExtent(extentGeo.properties.center, "n");
-  }
-  if (extentGeo.properties.northEast.lng < userGeo.properties.northEast.lng) {
-    return createExtent(extentGeo.properties.center, "e");
+    tempArr.push(createExtent(extentGeo.properties.center, "n"));
   }
   if (extentGeo.properties.southWest.lat > userGeo.properties.southWest.lat) {
-    return createExtent(extentGeo.properties.center, "s");
+    tempArr.push(createExtent(extentGeo.properties.center, "s"));
+  }
+  if (extentGeo.properties.northEast.lng < userGeo.properties.northEast.lng) {
+    tempArr.push(createExtent(extentGeo.properties.center, "e"));
   }
   if (extentGeo.properties.southWest.lng > userGeo.properties.southWest.lng) {
-    return createExtent(extentGeo.properties.center, "w");
+    tempArr.push(createExtent(extentGeo.properties.center, "w"));
   }
+  if (tempArr.length > 1) {
+    const d1 = distance(
+      [userGeo.properties.center.lng, userGeo.properties.center.lat],
+      [tempArr[0].properties.center.lng, tempArr[0].properties.center.lat]
+    );
+    const d2 = distance(
+      [userGeo.properties.center.lng, userGeo.properties.center.lat],
+      [tempArr[1].properties.center.lng, tempArr[1].properties.center.lat]
+    );
+    if (d1 > d2) return tempArr[1];
+  }
+  return tempArr[0];
 }
 
 function getClosestExtent(
@@ -272,5 +263,6 @@ export {
   getClosestExtent,
   getDirectionFromBound,
   getDirectionFromCenter,
+  getNewCenter,
   removeFurthestExtent,
 };
