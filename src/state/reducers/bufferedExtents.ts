@@ -1,4 +1,7 @@
-import { BUFFERED_EXTENTS_INITIALIZE, BUFFERED_EXTENTS_UPDATE_SUCCESS } from "../actions";
+import {
+  BUFFERED_EXTENTS_INITIALIZE,
+  BUFFERED_EXTENTS_UPDATE_SUCCESS,
+} from "../actions";
 
 class BufferedExtentsState {
   initialized: boolean;
@@ -12,7 +15,7 @@ class BufferedExtentsState {
 const initialState = new BufferedExtentsState();
 
 function createBufferedExtentsReducer(): (
-  BufferedExtentState: any,
+  BufferedExtentsState: any,
   AnyAction: any
 ) => BufferedExtentsState {
   return (state = initialState, action) => {
@@ -22,22 +25,20 @@ function createBufferedExtentsReducer(): (
           ...state,
           initialized: true,
           data: {
-            type: 'FeatureCollection',
-            features: [
-              action.payload.extentGeoJSON
-            ]
-          }
-        }
+            type: "FeatureCollection",
+            features: action.payload.features,
+          },
+        };
       }
       case BUFFERED_EXTENTS_UPDATE_SUCCESS: {
-        console.log('succeeding');
+        console.log("succeeding");
         return {
           ...state,
           data: {
-            type: 'FeatureCollection',
-            features: action.payload.extents
-          }
-        }
+            type: "FeatureCollection",
+            features: action.payload.features,
+          },
+        };
       }
       default:
         return state;

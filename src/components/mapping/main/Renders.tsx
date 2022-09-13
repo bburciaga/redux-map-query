@@ -32,14 +32,14 @@ export const Renders = () => {
         dispatch({
           type: USER_BOUND_INITIALIZE,
           payload: {
-            userGeoJSON: userGeo,
+            feature: userGeo,
           },
         });
       } else {
         dispatch({
           type: USER_BOUND_UPDATE_ON_ZOOM,
           payload: {
-            userGeoJSON: userGeo,
+            feature: userGeo,
           },
         });
       }
@@ -49,7 +49,7 @@ export const Renders = () => {
         dispatch({
           type: BUFFERED_EXTENTS_INITIALIZE,
           payload: {
-            extentGeoJSON: createExtent(map.getCenter()), // create bound from center
+            features: [createExtent(map.getCenter())],
           },
         });
       }
@@ -64,7 +64,7 @@ export const Renders = () => {
         dispatch({
           type: USER_BOUND_UPDATE_ON_MOVE,
           payload: {
-            userGeoJSON: userGeo,
+            feature: userGeo,
           },
         });
       }
@@ -73,7 +73,6 @@ export const Renders = () => {
       if (bufferedExtents.initialized) {
         const tempExtents = bufferedExtents.data.features;
         const intersects: any[] = [];
-        const userCenter = map.getCenter();
 
         tempExtents.forEach((extent: any) => {
           if (intersect(userGeo, extent)) {
@@ -86,8 +85,9 @@ export const Renders = () => {
             dispatch({
               type: BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS_REQUEST,
               payload: {
-                userCenter: userCenter,
+                aGeo: userGeo,
                 extents: tempExtents,
+                intersects: null,
               },
             });
             break;
