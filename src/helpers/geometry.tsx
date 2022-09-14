@@ -252,10 +252,10 @@ function removeFurthestExtent(
 
     if (index > -1) {
       const temp: any = tempExtents.splice(index, 1);
-      timestamp = temp.properties.timestamp;
+      timestamp = temp[0].properties.timestamp;
     }
   }
-  return { updated_extents: tempExtents, removed_timestamp: null };
+  return { updated_extents: tempExtents, removed_timestamp: timestamp };
 }
 
 export {

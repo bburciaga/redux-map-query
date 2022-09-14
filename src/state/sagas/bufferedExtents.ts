@@ -1,9 +1,11 @@
 import {
+  BUFFERED_EXTENTS_INITIALIZE,
   BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS_REQUEST,
   BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTIONS_REQUEST,
   BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS_REQUEST,
   BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS_REQUEST,
   BUFFERED_EXTENTS_UPDATE_SUCCESS,
+  CACHED_DATA_INITIALIZE,
   CACHED_DATA_UPDATE_REQUEST,
 } from "../actions";
 import { all, put, takeEvery } from "redux-saga/effects";
@@ -17,6 +19,33 @@ import {
 } from "../../helpers/geometry";
 import { center, difference, multiPolygon } from "@turf/turf";
 import { getGeoJSON } from "../../DataBCShapes";
+
+function* handle_BUFFERED_EXTENTS_INITIALIZE(action: any) {
+  const { extents } = action.payload;
+
+  const fetch_geo = extents[0];
+  const newData: any[] = [];
+
+  yield getGeoJSON(
+    "WHSE_WATER_MANAGEMENT.WLS_WATER_RESERVES_POLY",
+    fetch_geo
+  ).then((returnVal) => {
+    returnVal.features.map((feature: any) => {
+      feature.properties.extent_id = fetch_geo.properties.timestamp;
+      newData.push(feature);
+    });
+  });
+
+  yield put({
+    type: CACHED_DATA_INITIALIZE,
+    payload: {
+      feature_collection: {
+        type: "FeatureCollection",
+        features: newData,
+      },
+    },
+  });
+}
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
   const { aGeo, extents, cached_features } = action.payload;
@@ -131,7 +160,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
       newExtent = createExtent(closestExtent.properties.center, "w");
     }
 
-    const { updated_extents, removed_timestamp } = removeFurthestExtent(
+    const { updated_extents, removed_timestamp } = yield removeFurthestExtent(
       aGeo.properties.center,
       extents
     );
@@ -229,17 +258,15 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
       extents
     );
 
-    if (newExtent) {
-      yield put({
-        type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
-        payload: {
-          features: [...updated_extents, newExtent],
-          fetch_geo: newExtent,
-          removed_timestamp: removed_timestamp,
-          old_features: cached_features,
-        },
-      });
-    }
+    yield put({
+      type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
+      payload: {
+        features: [...updated_extents, newExtent],
+        fetch_geo: newExtent,
+        removed_timestamp: removed_timestamp,
+        old_features: cached_features,
+      },
+    });
   }
 }
 
@@ -257,6 +284,10 @@ function* handle_BUFFERED_EXTENTS_UPDATE_SUCCESS(action: any) {
     });
   });
 
+  console.log("newData", newData);
+  console.log("removed_timestamp", removed_timestamp);
+  console.log("old_features", old_features);
+
   yield put({
     type: CACHED_DATA_UPDATE_REQUEST,
     payload: {
@@ -269,6 +300,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_SUCCESS(action: any) {
 
 export default function* bufferedExtentsSaga() {
   yield all([
+    takeEvery(BUFFERED_EXTENTS_INITIALIZE, handle_BUFFERED_EXTENTS_INITIALIZE),
     takeEvery(
       BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS_REQUEST,
       handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS

@@ -51,7 +51,10 @@ export const Renders = () => {
         dispatch({
           type: BUFFERED_EXTENTS_INITIALIZE,
           payload: {
-            features: [createExtent(map.getCenter())],
+            aGeo: userGeo,
+            extents: [createExtent(map.getCenter())],
+            intersects: null,
+            cached_features: null,
           },
         });
       }

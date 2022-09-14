@@ -26,7 +26,7 @@ function createBufferedExtentsReducer(): (
           initialized: true,
           data: {
             type: "FeatureCollection",
-            features: action.payload.features,
+            features: action.payload.extents,
           },
         };
       }

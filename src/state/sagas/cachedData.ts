@@ -8,7 +8,6 @@ function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
   const { new_features, removed_timestamp, old_features } = action.payload;
   try {
     const tempFeatures = old_features;
-    console.log("old guys");
 
     if (removed_timestamp !== null && removed_timestamp !== undefined) {
       const indexArr: number[] = [];
@@ -23,8 +22,6 @@ function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
         tempFeatures.splice(index, 1);
       }
     }
-    console.log("updated old guys", tempFeatures);
-    console.log("new guys", new_features);
 
     yield put({
       type: CACHED_DATA_UPDATE_SUCCESS,
