@@ -1,5 +1,5 @@
-import { difference, intersect } from "@turf/turf";
-import { useMap, useMapEvent } from "react-leaflet";
+import { intersect } from "@turf/turf";
+import { GeoJSON, useMap, useMapEvent } from "react-leaflet";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { createExtent, createUserGeo } from "../../../helpers/geometry";
@@ -135,5 +135,15 @@ export const Renders = () => {
     }
   });
 
-  return <></>;
+  return (
+    <>
+      {cachedData.initialized && (
+        <GeoJSON
+          data={cachedData.data}
+          key={Math.random()}
+          style={{ color: "purple" }}
+        />
+      )}
+    </>
+  );
 };

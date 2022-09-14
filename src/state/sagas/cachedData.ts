@@ -7,19 +7,13 @@ import {
 function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
   const { new_features, removed_timestamp, old_features } = action.payload;
   try {
-    const tempFeatures = old_features;
+    const tempFeatures: any = [];
 
-    if (removed_timestamp !== null && removed_timestamp !== undefined) {
-      const indexArr: number[] = [];
-
-      for (let i = 0; i < tempFeatures.length; i++) {
-        if (tempFeatures[i].properties.extent_id === removed_timestamp) {
-          indexArr.push(i);
+    if (removed_timestamp !== null || removed_timestamp !== undefined) {
+      for (const feature of old_features) {
+        if (feature.properties.extent_id !== removed_timestamp) {
+          tempFeatures.push(feature);
         }
-      }
-
-      for (const index of indexArr) {
-        tempFeatures.splice(index, 1);
       }
     }
 
