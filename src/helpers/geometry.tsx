@@ -238,7 +238,7 @@ function removeFurthestExtent(
     let index = -1;
 
     for (let i = 0; i < tempExtents.length; i++) {
-      const tempCenter = tempExtents[0].properties.center;
+      const tempCenter = tempExtents[i].properties.center;
       const tempDistance = distance(
         [tempCenter.lng, tempCenter.lat],
         [center.lng, center.lat]

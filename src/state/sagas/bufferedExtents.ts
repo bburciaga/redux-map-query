@@ -19,7 +19,6 @@ import { getGeoJSON } from "../../DataBCShapes";
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
   const { aGeo, extents } = action.payload;
-  const updatedExtents = removeFurthestExtent(aGeo.properties.center, extents);
 
   const closestExtent: any = getClosestExtent(aGeo.properties.center, extents);
   const direction: string = getDirectionFromBound(
@@ -30,6 +29,8 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
     closestExtent.properties.center,
     direction
   );
+
+  const updatedExtents = removeFurthestExtent(aGeo.properties.center, extents);
 
   yield put({
     type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
@@ -44,15 +45,13 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
   const { aGeo, intersects, extents } = action.payload;
 
   if (difference(action.payload.aGeo, intersects[0])) {
+    const closestExtent = getClosestExtent(aGeo.properties.center, extents);
+    const newExtent = getNextExtent(action.payload.aGeo, closestExtent);
+
     const updatedExtents = removeFurthestExtent(
       aGeo.properties.center,
       extents
     );
-    const closestExtent = getClosestExtent(
-      aGeo.properties.center,
-      updatedExtents
-    );
-    const newExtent = getNextExtent(action.payload.aGeo, closestExtent);
 
     yield put({
       type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
@@ -74,10 +73,6 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
   );
 
   if (difference(aGeo, intersectsMultiPoly)) {
-    const updatedExtents = removeFurthestExtent(
-      aGeo.properties.center,
-      extents
-    );
     const closestExtent = getClosestExtent(aGeo.properties.center, intersects);
 
     intersectsMultiPoly.properties.center = {
@@ -128,6 +123,11 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
       newExtent = createExtent(closestExtent.properties.center, "w");
     }
 
+    const updatedExtents = removeFurthestExtent(
+      aGeo.properties.center,
+      extents
+    );
+
     if (newExtent) {
       yield put({
         type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
@@ -150,11 +150,6 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
   );
 
   if (difference(aGeo, intersectsMultiPoly)) {
-    const updatedExtents = removeFurthestExtent(
-      aGeo.properties.center,
-      extents
-    );
-
     // check where each geo is
     const tempExtents: any[] = [];
     intersects.forEach((feature: any) => {
@@ -218,6 +213,11 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
       assignAdjacent("nw", "se");
       newExtent = getNextExtent("sw");
     }
+
+    const updatedExtents = removeFurthestExtent(
+      aGeo.properties.center,
+      extents
+    );
 
     if (newExtent) {
       yield put({
