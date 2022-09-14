@@ -2,11 +2,14 @@ import { CACHED_DATA_UPDATE_SUCCESS } from "../actions";
 
 class CachedDataState {
   initialized: boolean;
-  data: null;
+  data: any;
 
   constructor() {
     this.initialized = false;
-    this.data = null;
+    this.data = {
+      type: "FeatureCollection",
+      features: [],
+    };
   }
 }
 const initialState = new CachedDataState();

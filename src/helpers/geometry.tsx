@@ -233,6 +233,7 @@ function removeFurthestExtent(
   extents: any[]
 ) {
   const tempExtents = extents;
+  let timestamp: any;
   if (tempExtents.length > 4) {
     let furthestDistance = -1;
     let index = -1;
@@ -250,10 +251,11 @@ function removeFurthestExtent(
     }
 
     if (index > -1) {
-      tempExtents.splice(index, 1);
+      const temp: any = tempExtents.splice(index, 1);
+      timestamp = temp.properties.timestamp;
     }
   }
-  return tempExtents;
+  return { updated_extents: tempExtents, removed_timestamp: null };
 }
 
 export {

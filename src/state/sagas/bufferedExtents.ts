@@ -4,6 +4,7 @@ import {
   BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS_REQUEST,
   BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS_REQUEST,
   BUFFERED_EXTENTS_UPDATE_SUCCESS,
+  CACHED_DATA_UPDATE_REQUEST,
 } from "../actions";
 import { all, put, takeEvery } from "redux-saga/effects";
 import {
@@ -30,13 +31,17 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
     direction
   );
 
-  const updatedExtents = removeFurthestExtent(aGeo.properties.center, extents);
+  const { updated_extents, removed_timestamp } = removeFurthestExtent(
+    aGeo.properties.center,
+    extents
+  );
 
   yield put({
     type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
     payload: {
-      features: [...updatedExtents, newExtent],
+      features: [...updated_extents, newExtent],
       fetch_geo: newExtent,
+      removed_timestamp: removed_timestamp,
     },
   });
 }
@@ -48,7 +53,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
     const closestExtent = getClosestExtent(aGeo.properties.center, extents);
     const newExtent = getNextExtent(action.payload.aGeo, closestExtent);
 
-    const updatedExtents = removeFurthestExtent(
+    const { updated_extents, removed_timestamp } = removeFurthestExtent(
       aGeo.properties.center,
       extents
     );
@@ -56,8 +61,9 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
     yield put({
       type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
       payload: {
-        features: [...updatedExtents, newExtent],
+        features: [...updated_extents, newExtent],
         fetch_geo: newExtent,
+        removed_timestamp: removed_timestamp,
       },
     });
   }
@@ -123,7 +129,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
       newExtent = createExtent(closestExtent.properties.center, "w");
     }
 
-    const updatedExtents = removeFurthestExtent(
+    const { updated_extents, removed_timestamp } = removeFurthestExtent(
       aGeo.properties.center,
       extents
     );
@@ -132,8 +138,9 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
       yield put({
         type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
         payload: {
-          features: [...updatedExtents, newExtent],
+          features: [...updated_extents, newExtent],
           fetch_geo: newExtent,
+          removed_timestamp: removed_timestamp,
         },
       });
     }
@@ -214,7 +221,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
       newExtent = getNextExtent("sw");
     }
 
-    const updatedExtents = removeFurthestExtent(
+    const { updated_extents, removed_timestamp } = removeFurthestExtent(
       aGeo.properties.center,
       extents
     );
@@ -223,8 +230,9 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
       yield put({
         type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
         payload: {
-          features: [...updatedExtents, newExtent],
+          features: [...updated_extents, newExtent],
           fetch_geo: newExtent,
+          removed_timestamp: removed_timestamp,
         },
       });
     }
@@ -232,7 +240,23 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
 }
 
 function* handle_BUFFERED_EXTENTS_UPDATE_SUCCESS(action: any) {
-  let newData: any = [];
+  const { fetch_geo, removed_timestamp } = action.payload;
+  const newData: any = [];
+
+  getGeoJSON("WHSE_WATER_MANAGEMENT.WLS_WATER_RESERVES_POLY", fetch_geo).then(
+    (returnVal) => {
+      returnVal.features.map((feature: any) => {
+        feature.properties.extent_id = fetch_geo.properties.timestamp;
+        newData.push(feature);
+      });
+    }
+  );
+
+  yield put({
+    type: CACHED_DATA_UPDATE_REQUEST,
+    new_features: newData,
+    removed_timestamp: removed_timestamp,
+  });
 }
 
 export default function* bufferedExtentsSaga() {
