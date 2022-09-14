@@ -7,10 +7,12 @@ import {
 class UserBoundState {
   initialized: boolean;
   data: any;
+  count: number;
 
   constructor() {
     this.initialized = false;
     this.data = null;
+    this.count = 0;
   }
 }
 const initialState = new UserBoundState();
@@ -26,6 +28,7 @@ function createUserBoundReducer(): (
           ...state,
           initialized: true,
           data: action.payload.feature,
+          count: action.payload.count,
         };
       }
       case USER_BOUND_UPDATE_ON_MOVE:
@@ -33,6 +36,7 @@ function createUserBoundReducer(): (
         return {
           ...state,
           data: action.payload.feature,
+          count: action.payload.count,
         };
       }
       default:

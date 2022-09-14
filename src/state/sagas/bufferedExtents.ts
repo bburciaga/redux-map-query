@@ -48,7 +48,7 @@ function* handle_BUFFERED_EXTENTS_INITIALIZE(action: any) {
 }
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
-  const { aGeo, extents, cached_features } = action.payload;
+  const { aGeo, extents, cached_features, count } = action.payload;
 
   const closestExtent: any = getClosestExtent(aGeo.properties.center, extents);
   const direction: string = getDirectionFromBound(
@@ -72,12 +72,13 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
       fetch_geo: newExtent,
       removed_timestamp: removed_timestamp,
       old_features: cached_features,
+      count: count,
     },
   });
 }
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
-  const { aGeo, intersects, extents, cached_features } = action.payload;
+  const { aGeo, intersects, extents, cached_features, count } = action.payload;
 
   if (difference(action.payload.aGeo, intersects[0])) {
     const closestExtent = getClosestExtent(aGeo.properties.center, extents);
@@ -95,13 +96,14 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
         fetch_geo: newExtent,
         removed_timestamp: removed_timestamp,
         old_features: cached_features,
+        count: count,
       },
     });
   }
 }
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
-  const { aGeo, intersects, extents, cached_features } = action.payload;
+  const { aGeo, intersects, extents, cached_features, count } = action.payload;
 
   const intersectsMultiPoly: any = multiPolygon(
     intersects.map((feature: any) => {
@@ -173,6 +175,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
           fetch_geo: newExtent,
           removed_timestamp: removed_timestamp,
           old_features: cached_features,
+          count: count,
         },
       });
     }
@@ -180,7 +183,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
 }
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
-  const { aGeo, intersects, extents, cached_features } = action.payload;
+  const { aGeo, intersects, extents, cached_features, count } = action.payload;
 
   const intersectsMultiPoly: any = multiPolygon(
     intersects.map((feature: any) => {
@@ -265,6 +268,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
         fetch_geo: newExtent,
         removed_timestamp: removed_timestamp,
         old_features: cached_features,
+        count: count,
       },
     });
   }

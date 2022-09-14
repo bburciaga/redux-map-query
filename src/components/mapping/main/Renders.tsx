@@ -1,4 +1,5 @@
 import { intersect } from "@turf/turf";
+import React from "react";
 import { GeoJSON, useMap, useMapEvent } from "react-leaflet";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
@@ -16,6 +17,7 @@ import {
 import { selectBufferedExtents } from "../../../state/reducers/bufferedExtents";
 import { selectCachedData } from "../../../state/reducers/cachedData";
 import { selectUserBound } from "../../../state/reducers/userBound";
+import InfoBox from "./InfoBox";
 
 export const Renders = () => {
   const dispatch = useDispatch();
@@ -23,6 +25,9 @@ export const Renders = () => {
   const userBound = useSelector(selectUserBound);
   const bufferedExtents = useSelector(selectBufferedExtents);
   const cachedData = useSelector(selectCachedData);
+
+  const countRef = React.useRef(0);
+  countRef.current++;
 
   useMapEvent("zoomend", (_e) => {
     if (map.getZoom() > 8) {
@@ -35,6 +40,7 @@ export const Renders = () => {
           type: USER_BOUND_INITIALIZE,
           payload: {
             feature: userGeo,
+            count: userBound.count + 1,
           },
         });
       } else {
@@ -42,6 +48,7 @@ export const Renders = () => {
           type: USER_BOUND_UPDATE_ON_ZOOM,
           payload: {
             feature: userGeo,
+            count: userBound.count + 1,
           },
         });
       }
@@ -55,6 +62,7 @@ export const Renders = () => {
             extents: [createExtent(map.getCenter())],
             intersects: null,
             cached_features: null,
+            count: bufferedExtents.count + 1,
           },
         });
       }
@@ -70,6 +78,7 @@ export const Renders = () => {
           type: USER_BOUND_UPDATE_ON_MOVE,
           payload: {
             feature: userGeo,
+            count: userBound.count + 1,
           },
         });
       }
@@ -94,6 +103,7 @@ export const Renders = () => {
                 extents: tempExtents,
                 intersects: null,
                 cached_features: cachedData.data.features,
+                count: bufferedExtents.count + 1,
               },
             });
             break;
@@ -105,6 +115,7 @@ export const Renders = () => {
                 extents: tempExtents,
                 intersects: intersects,
                 cached_features: cachedData.data.features,
+                count: bufferedExtents.count + 1,
               },
             });
             break;
@@ -116,6 +127,7 @@ export const Renders = () => {
                 extents: tempExtents,
                 intersects: intersects,
                 cached_features: cachedData.data.features,
+                count: bufferedExtents.count + 1,
               },
             });
             break;
@@ -127,6 +139,7 @@ export const Renders = () => {
                 extents: tempExtents,
                 intersects: intersects,
                 cached_features: cachedData.data.features,
+                count: bufferedExtents.count + 1,
               },
             });
             break;
@@ -144,6 +157,7 @@ export const Renders = () => {
           style={{ color: "purple" }}
         />
       )}
+      <InfoBox count={countRef.current} />
     </>
   );
 };

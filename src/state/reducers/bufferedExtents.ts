@@ -6,10 +6,12 @@ import {
 class BufferedExtentsState {
   initialized: boolean;
   data: any;
+  count: number;
 
   constructor() {
     this.initialized = false;
     this.data = null;
+    this.count = 0;
   }
 }
 const initialState = new BufferedExtentsState();
@@ -28,16 +30,17 @@ function createBufferedExtentsReducer(): (
             type: "FeatureCollection",
             features: action.payload.extents,
           },
+          count: action.payload.count,
         };
       }
       case BUFFERED_EXTENTS_UPDATE_SUCCESS: {
-        console.log("succeeding");
         return {
           ...state,
           data: {
             type: "FeatureCollection",
             features: action.payload.features,
           },
+          count: action.payload.count,
         };
       }
       default:
