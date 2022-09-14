@@ -1,37 +1,43 @@
-import { useSelector } from "react-redux";
-import { all, put, takeEvery } from "redux-saga/effects";
+import { put, select, takeEvery } from "redux-saga/effects";
 import {
   CACHED_DATA_UPDATE_REQUEST,
   CACHED_DATA_UPDATE_SUCCESS,
 } from "../actions";
-import { selectCachedData } from "../reducers/cachedData";
 
 function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
-  const { new_features, removed_timestamp } = action.payload;
-  const cachedData = useSelector(selectCachedData);
-  const tempFeatures = cachedData.data.features;
+  const { new_features, removed_timestamp, old_features } = action.payload;
+  try {
+    const tempFeatures = old_features;
+    console.log("old guys");
 
-  if (removed_timestamp !== null && removed_timestamp !== undefined) {
-    const indexArr: number[] = [];
+    if (removed_timestamp !== null && removed_timestamp !== undefined) {
+      const indexArr: number[] = [];
 
-    for (let i = 0; i < tempFeatures.length; i++) {
-      if (tempFeatures[i].properties.extent_id === removed_timestamp) {
-        indexArr.push(i);
+      for (let i = 0; i < tempFeatures.length; i++) {
+        if (tempFeatures[i].properties.extent_id === removed_timestamp) {
+          indexArr.push(i);
+        }
+      }
+
+      for (const index of indexArr) {
+        tempFeatures.splice(index, 1);
       }
     }
+    console.log("updated old guys", tempFeatures);
+    console.log("new guys", new_features);
 
-    for (const index of indexArr) {
-      tempFeatures.splice(index, 1);
-    }
+    yield put({
+      type: CACHED_DATA_UPDATE_SUCCESS,
+      payload: {
+        feature_collection: {
+          type: "FeatureCollection",
+          features: [...tempFeatures, ...new_features],
+        },
+      },
+    });
+  } catch (e) {
+    console.log("not a cool guy", e);
   }
-
-  yield put({
-    type: CACHED_DATA_UPDATE_SUCCESS,
-    data: {
-      type: "FeatureCollection",
-      features: [...tempFeatures, ...new_features],
-    },
-  });
 }
 
 export default function* cachedDataSaga() {

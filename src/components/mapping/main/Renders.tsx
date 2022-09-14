@@ -14,6 +14,7 @@ import {
   USER_BOUND_UPDATE_ON_ZOOM,
 } from "../../../state/actions";
 import { selectBufferedExtents } from "../../../state/reducers/bufferedExtents";
+import { selectCachedData } from "../../../state/reducers/cachedData";
 import { selectUserBound } from "../../../state/reducers/userBound";
 
 export const Renders = () => {
@@ -21,6 +22,7 @@ export const Renders = () => {
   const map = useMap();
   const userBound = useSelector(selectUserBound);
   const bufferedExtents = useSelector(selectBufferedExtents);
+  const cachedData = useSelector(selectCachedData);
 
   useMapEvent("zoomend", (_e) => {
     if (map.getZoom() > 8) {
@@ -88,6 +90,7 @@ export const Renders = () => {
                 aGeo: userGeo,
                 extents: tempExtents,
                 intersects: null,
+                cached_features: cachedData.data.features,
               },
             });
             break;
@@ -98,6 +101,7 @@ export const Renders = () => {
                 aGeo: userGeo,
                 extents: tempExtents,
                 intersects: intersects,
+                cached_features: cachedData.data.features,
               },
             });
             break;
@@ -108,6 +112,7 @@ export const Renders = () => {
                 aGeo: userGeo,
                 extents: tempExtents,
                 intersects: intersects,
+                cached_features: cachedData.data.features,
               },
             });
             break;
@@ -118,6 +123,7 @@ export const Renders = () => {
                 aGeo: userGeo,
                 extents: tempExtents,
                 intersects: intersects,
+                cached_features: cachedData.data.features,
               },
             });
             break;
