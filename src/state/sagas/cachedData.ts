@@ -5,14 +5,18 @@ import {
 } from "../actions";
 
 function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
-  const { new_features, removed_timestamp, old_features } = action.payload;
+  const { new_features, timestamps, old_features } = action.payload;
   try {
     const tempFeatures: any = [];
 
-    if (removed_timestamp !== null || removed_timestamp !== undefined) {
+    if (timestamps !== null || timestamps !== undefined) {
       for (const feature of old_features) {
-        if (feature.properties.extent_id !== removed_timestamp) {
-          tempFeatures.push(feature);
+        for (const timestamp of timestamps) {
+          console.log(timestamp);
+          if (feature.properties.extent_id === timestamp) {
+            tempFeatures.push(feature);
+            break;
+          }
         }
       }
     }

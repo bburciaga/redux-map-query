@@ -60,7 +60,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
     direction
   );
 
-  const { updated_extents, removed_timestamp } = removeFurthestExtent(
+  const { updated_extents, timestamps } = removeFurthestExtent(
     aGeo.properties.center,
     extents
   );
@@ -70,7 +70,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
     payload: {
       features: [...updated_extents, newExtent],
       fetch_geo: newExtent,
-      removed_timestamp: removed_timestamp,
+      timestamps: timestamps,
       old_features: cached_features,
       count: count,
     },
@@ -84,7 +84,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
     const closestExtent = getClosestExtent(aGeo.properties.center, extents);
     const newExtent = getNextExtent(action.payload.aGeo, closestExtent);
 
-    const { updated_extents, removed_timestamp } = removeFurthestExtent(
+    const { updated_extents, timestamps } = removeFurthestExtent(
       aGeo.properties.center,
       extents
     );
@@ -94,7 +94,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
       payload: {
         features: [...updated_extents, newExtent],
         fetch_geo: newExtent,
-        removed_timestamp: removed_timestamp,
+        timestamps: timestamps,
         old_features: cached_features,
         count: count,
       },
@@ -162,7 +162,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
       newExtent = createExtent(closestExtent.properties.center, "w");
     }
 
-    const { updated_extents, removed_timestamp } = yield removeFurthestExtent(
+    const { updated_extents, timestamps } = yield removeFurthestExtent(
       aGeo.properties.center,
       extents
     );
@@ -173,7 +173,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
         payload: {
           features: [...updated_extents, newExtent],
           fetch_geo: newExtent,
-          removed_timestamp: removed_timestamp,
+          timestamps: timestamps,
           old_features: cached_features,
           count: count,
         },
@@ -256,7 +256,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
       newExtent = getNextExtent("sw");
     }
 
-    const { updated_extents, removed_timestamp } = removeFurthestExtent(
+    const { updated_extents, timestamps } = removeFurthestExtent(
       aGeo.properties.center,
       extents
     );
@@ -266,7 +266,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
       payload: {
         features: [...updated_extents, newExtent],
         fetch_geo: newExtent,
-        removed_timestamp: removed_timestamp,
+        timestamps: timestamps,
         old_features: cached_features,
         count: count,
       },
@@ -275,7 +275,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
 }
 
 function* handle_BUFFERED_EXTENTS_UPDATE_SUCCESS(action: any) {
-  const { fetch_geo, removed_timestamp, old_features } = action.payload;
+  const { fetch_geo, timestamps, old_features } = action.payload;
   const newData: any = [];
 
   yield getGeoJSON(
@@ -288,15 +288,11 @@ function* handle_BUFFERED_EXTENTS_UPDATE_SUCCESS(action: any) {
     });
   });
 
-  console.log("newData", newData);
-  console.log("removed_timestamp", removed_timestamp);
-  console.log("old_features", old_features);
-
   yield put({
     type: CACHED_DATA_UPDATE_REQUEST,
     payload: {
       new_features: newData,
-      removed_timestamp: removed_timestamp,
+      timestamps: timestamps,
       old_features: old_features,
     },
   });
