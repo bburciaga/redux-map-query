@@ -12,7 +12,6 @@ function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
     if (timestamps !== null || timestamps !== undefined) {
       for (const feature of old_features) {
         for (const timestamp of timestamps) {
-          console.log(timestamp);
           if (feature.properties.extent_id === timestamp) {
             tempFeatures.push(feature);
             break;
