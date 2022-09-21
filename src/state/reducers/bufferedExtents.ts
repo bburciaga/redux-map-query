@@ -1,16 +1,23 @@
 import {
-  BUFFERED_EXTENTS_INITIALIZE,
+  BUFFERED_EXTENTS_INITIALIZE_FAIL,
+  BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
+  BUFFERED_EXTENTS_UPDATE_FAIL,
   BUFFERED_EXTENTS_UPDATE_SUCCESS,
 } from "../actions";
 
 class BufferedExtentsState {
   initialized: boolean;
+  error: any;
   data: any;
   count: number;
 
   constructor() {
     this.initialized = false;
-    this.data = null;
+    this.error = null;
+    this.data = {
+      type: "FeatureCollection",
+      features: [],
+    };
     this.count = 0;
   }
 }
@@ -22,13 +29,13 @@ function createBufferedExtentsReducer(): (
 ) => BufferedExtentsState {
   return (state = initialState, action) => {
     switch (action.type) {
-      case BUFFERED_EXTENTS_INITIALIZE: {
+      case BUFFERED_EXTENTS_INITIALIZE_SUCCESS: {
         return {
           ...state,
           initialized: true,
           data: {
             type: "FeatureCollection",
-            features: action.payload.extents,
+            features: action.payload.features,
           },
           count: action.payload.count,
         };
@@ -41,6 +48,13 @@ function createBufferedExtentsReducer(): (
             features: action.payload.features,
           },
           count: action.payload.count,
+        };
+      }
+      case BUFFERED_EXTENTS_INITIALIZE_FAIL:
+      case BUFFERED_EXTENTS_UPDATE_FAIL: {
+        return {
+          ...state,
+          error: action.payload.error,
         };
       }
       default:

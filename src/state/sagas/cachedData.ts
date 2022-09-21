@@ -1,23 +1,72 @@
 import { put, select, takeEvery, throttle } from "redux-saga/effects";
+import { getGeoJSON } from "../../DataBCShapes";
 import {
   CACHED_DATA_UPDATE_REQUEST,
   CACHED_DATA_UPDATE_SUCCESS,
   CACHED_DATA_UPDATE_FAIL,
+  CACHED_DATA_INITIALIZE_REQUEST,
+  CACHED_DATA_INITIALIZE_SUCCESS,
+  CACHED_DATA_INITIALIZE_FAIL,
 } from "../actions";
-import { selectBufferedExtents } from "../reducers/bufferedExtents";
 import { selectCachedData } from "../reducers/cachedData";
 
-function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
-  const { new_features, timestamps, old_features } = action.payload;
+function* handle_CACHED_DATA_INITIALIZE_REQUEST(action: any) {
+  const { fetch_geo } = action.payload;
+
   try {
+    const newData: any = [];
+
+    yield getGeoJSON(
+      "WHSE_WATER_MANAGEMENT.WLS_WATER_RESERVES_POLY",
+      fetch_geo
+    ).then((returnVal) => {
+      returnVal.features.map((feature: any) => {
+        feature.properties.extent_id = fetch_geo.properties.timestamp;
+        newData.push(feature);
+      });
+    });
+
+    yield put({
+      type: CACHED_DATA_INITIALIZE_SUCCESS,
+      payload: {
+        featureCollection: {
+          type: "FeatureCollection",
+          features: newData,
+        },
+      },
+    });
+  } catch (error: any) {
+    yield put({
+      type: CACHED_DATA_INITIALIZE_FAIL,
+      payload: {
+        error: error,
+      },
+    });
+  }
+}
+
+function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
+  const { fetch_geo, timestamps } = action.payload;
+
+  try {
+    const newData: any = [];
+
+    yield getGeoJSON(
+      "WHSE_WATER_MANAGEMENT.WLS_WATER_RESERVES_POLY",
+      fetch_geo
+    ).then((returnVal) => {
+      returnVal.features.map((feature: any) => {
+        feature.properties.extent_id = fetch_geo.properties.timestamp;
+        newData.push(feature);
+      });
+    });
+
     const cachedData = yield select(selectCachedData);
-    console.log("coolest data");
-    console.log(cachedData);
 
     const tempFeatures: any = [];
 
     if (timestamps !== null || timestamps !== undefined) {
-      for (const feature of old_features) {
+      for (const feature of cachedData.data.features) {
         for (const timestamp of timestamps) {
           if (feature.properties.extent_id === timestamp) {
             tempFeatures.push(feature);
@@ -32,14 +81,16 @@ function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
       payload: {
         feature_collection: {
           type: "FeatureCollection",
-          features: [...tempFeatures, ...new_features],
+          features: [...tempFeatures, ...newData],
         },
       },
     });
   } catch (error: any) {
     yield put({
       type: CACHED_DATA_UPDATE_FAIL,
-      payload: error,
+      payload: {
+        error: error,
+      },
     });
   }
 }
@@ -48,5 +99,9 @@ export default function* cachedDataSaga() {
   yield takeEvery(
     CACHED_DATA_UPDATE_REQUEST,
     handle_CACHED_DATA_UPDATE_REQUEST
+  );
+  yield takeEvery(
+    CACHED_DATA_INITIALIZE_REQUEST,
+    handle_CACHED_DATA_INITIALIZE_REQUEST
   );
 }

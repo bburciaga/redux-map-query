@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { createExtent, createUserGeo } from "../../../helpers/geometry";
 import {
-  BUFFERED_EXTENTS_INITIALIZE,
+  BUFFERED_EXTENTS_INITIALIZE_REQUEST,
   BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS_REQUEST,
   BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTIONS_REQUEST,
   BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS_REQUEST,
@@ -56,13 +56,11 @@ export const Renders = () => {
       /* Buffered Extent Actions */
       if (!bufferedExtents.initialized) {
         dispatch({
-          type: BUFFERED_EXTENTS_INITIALIZE,
+          type: BUFFERED_EXTENTS_INITIALIZE_REQUEST,
           payload: {
             aGeo: userGeo,
             extents: [createExtent(map.getCenter())],
             intersects: null,
-            cached_features: null,
-            count: bufferedExtents.count + 1,
           },
         });
       }
@@ -100,10 +98,7 @@ export const Renders = () => {
               type: BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS_REQUEST,
               payload: {
                 aGeo: userGeo,
-                extents: tempExtents,
                 intersects: null,
-                cached_features: cachedData.data.features,
-                count: bufferedExtents.count + 1,
               },
             });
             break;
@@ -112,10 +107,7 @@ export const Renders = () => {
               type: BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTIONS_REQUEST,
               payload: {
                 aGeo: userGeo,
-                extents: tempExtents,
                 intersects: intersects,
-                cached_features: cachedData.data.features,
-                count: bufferedExtents.count + 1,
               },
             });
             break;
@@ -124,10 +116,7 @@ export const Renders = () => {
               type: BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS_REQUEST,
               payload: {
                 aGeo: userGeo,
-                extents: tempExtents,
                 intersects: intersects,
-                cached_features: cachedData.data.features,
-                count: bufferedExtents.count + 1,
               },
             });
             break;
@@ -136,10 +125,7 @@ export const Renders = () => {
               type: BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS_REQUEST,
               payload: {
                 aGeo: userGeo,
-                extents: tempExtents,
                 intersects: intersects,
-                cached_features: cachedData.data.features,
-                count: bufferedExtents.count + 1,
               },
             });
             break;

@@ -1,4 +1,9 @@
-import { CACHED_DATA_INITIALIZE, CACHED_DATA_UPDATE_SUCCESS } from "../actions";
+import {
+  CACHED_DATA_INITIALIZE_FAIL,
+  CACHED_DATA_INITIALIZE_SUCCESS,
+  CACHED_DATA_UPDATE_FAIL,
+  CACHED_DATA_UPDATE_SUCCESS,
+} from "../actions";
 
 export class CachedDataState {
   initialized: boolean;
@@ -20,7 +25,7 @@ function createCachedDataReducer(): (
 ) => CachedDataState {
   return (state = initialState, action) => {
     switch (action.type) {
-      case CACHED_DATA_INITIALIZE: {
+      case CACHED_DATA_INITIALIZE_SUCCESS: {
         return {
           ...state,
           initialized: true,
@@ -31,6 +36,13 @@ function createCachedDataReducer(): (
         return {
           ...state,
           data: action.payload.feature_collection,
+        };
+      }
+      case CACHED_DATA_INITIALIZE_FAIL:
+      case CACHED_DATA_UPDATE_FAIL: {
+        return {
+          ...state,
+          error: action.payload.error,
         };
       }
       default:
