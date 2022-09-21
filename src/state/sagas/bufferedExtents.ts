@@ -88,7 +88,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
   const { aGeo, intersects } = action.payload;
 
   try {
-    const bufferedExtents: any = select(selectBufferedExtents);
+    const bufferedExtents = yield select(selectBufferedExtents);
 
     if (difference(action.payload.aGeo, intersects[0])) {
       const closestExtent = getClosestExtent(
@@ -126,7 +126,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
   const { aGeo, intersects } = action.payload;
 
   try {
-    const bufferedExtents: any = select(selectBufferedExtents);
+    const bufferedExtents = yield select(selectBufferedExtents);
 
     const intersectsMultiPoly: any = multiPolygon(
       intersects.map((feature: any) => {
@@ -219,7 +219,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
   const { aGeo, intersects } = action.payload;
 
   try {
-    const bufferedExtents: any = select(selectBufferedExtents);
+    const bufferedExtents = yield select(selectBufferedExtents);
 
     const intersectsMultiPoly: any = multiPolygon(
       intersects.map((feature: any) => {
@@ -318,13 +318,13 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
 }
 
 function* handle_BUFFERED_EXTENTS_INITIALIZE_SUCCESS(action: any) {
-  const { extents } = action.payload;
+  const { features } = action.payload;
 
   try {
     yield put({
       type: CACHED_DATA_INITIALIZE_REQUEST,
       payload: {
-        fetch_geo: extents[0],
+        fetch_geo: features[0],
       },
     });
   } catch (error: any) {

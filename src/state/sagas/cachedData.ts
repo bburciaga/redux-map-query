@@ -1,4 +1,4 @@
-import { put, select, takeEvery, throttle } from "redux-saga/effects";
+import { all, put, select, takeEvery, throttle } from "redux-saga/effects";
 import { getGeoJSON } from "../../DataBCShapes";
 import {
   CACHED_DATA_UPDATE_REQUEST,
@@ -29,7 +29,7 @@ function* handle_CACHED_DATA_INITIALIZE_REQUEST(action: any) {
     yield put({
       type: CACHED_DATA_INITIALIZE_SUCCESS,
       payload: {
-        featureCollection: {
+        feature_collection: {
           type: "FeatureCollection",
           features: newData,
         },
@@ -96,12 +96,11 @@ function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
 }
 
 export default function* cachedDataSaga() {
-  yield takeEvery(
-    CACHED_DATA_UPDATE_REQUEST,
-    handle_CACHED_DATA_UPDATE_REQUEST
-  );
-  yield takeEvery(
-    CACHED_DATA_INITIALIZE_REQUEST,
-    handle_CACHED_DATA_INITIALIZE_REQUEST
-  );
+  yield all([
+    takeEvery(CACHED_DATA_UPDATE_REQUEST, handle_CACHED_DATA_UPDATE_REQUEST),
+    takeEvery(
+      CACHED_DATA_INITIALIZE_REQUEST,
+      handle_CACHED_DATA_INITIALIZE_REQUEST
+    ),
+  ]);
 }
