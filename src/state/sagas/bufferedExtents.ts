@@ -5,10 +5,11 @@ import {
   BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS_REQUEST,
   BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS_REQUEST,
   BUFFERED_EXTENTS_UPDATE_SUCCESS,
+  BUFFERED_EXTENTS_UPDATE_FAIL,
   CACHED_DATA_INITIALIZE,
   CACHED_DATA_UPDATE_REQUEST,
 } from "../actions";
-import { all, put, takeEvery } from "redux-saga/effects";
+import { all, put, takeEvery, throttle, call } from "redux-saga/effects";
 import {
   createExtent,
   getClosestExtent,
@@ -23,58 +24,72 @@ import { getGeoJSON } from "../../DataBCShapes";
 function* handle_BUFFERED_EXTENTS_INITIALIZE(action: any) {
   const { extents } = action.payload;
 
-  const fetch_geo = extents[0];
-  const newData: any[] = [];
+  try {
+    const fetch_geo = extents[0];
+    const newData: any[] = [];
 
-  yield getGeoJSON(
-    "WHSE_WATER_MANAGEMENT.WLS_WATER_RESERVES_POLY",
-    fetch_geo
-  ).then((returnVal) => {
-    returnVal.features.map((feature: any) => {
-      feature.properties.extent_id = fetch_geo.properties.timestamp;
-      newData.push(feature);
+    yield getGeoJSON(
+      "WHSE_WATER_MANAGEMENT.WLS_WATER_RESERVES_POLY",
+      fetch_geo
+    ).then((returnVal) => {
+      returnVal.features.map((feature: any) => {
+        feature.properties.extent_id = fetch_geo.properties.timestamp;
+        newData.push(feature);
+      });
     });
-  });
 
-  yield put({
-    type: CACHED_DATA_INITIALIZE,
-    payload: {
-      feature_collection: {
-        type: "FeatureCollection",
-        features: newData,
+    yield put({
+      type: CACHED_DATA_INITIALIZE,
+      payload: {
+        feature_collection: {
+          type: "FeatureCollection",
+          features: newData,
+        },
       },
-    },
-  });
+    });
+  } catch (error: any) {
+    yield put({
+      type: BUFFERED_EXTENTS_UPDATE_FAIL,
+      payload: error
+    });
+  }
 }
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
   const { aGeo, extents, cached_features, count } = action.payload;
 
-  const closestExtent: any = getClosestExtent(aGeo.properties.center, extents);
-  const direction: string = getDirectionFromBound(
-    aGeo.properties.center,
-    closestExtent
-  );
-  const newExtent: any = createExtent(
-    closestExtent.properties.center,
-    direction
-  );
+  try {
+    const closestExtent: any = getClosestExtent(aGeo.properties.center, extents);
+    const direction: string = getDirectionFromBound(
+      aGeo.properties.center,
+      closestExtent
+    );
+    const newExtent: any = createExtent(
+      closestExtent.properties.center,
+      direction
+    );
 
-  const { updated_extents, timestamps } = removeFurthestExtent(
-    aGeo.properties.center,
-    extents
-  );
+    const { updated_extents, timestamps } = removeFurthestExtent(
+      aGeo.properties.center,
+      extents
+    );
 
-  yield put({
-    type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
-    payload: {
-      features: [...updated_extents, newExtent],
-      fetch_geo: newExtent,
-      timestamps: timestamps,
-      old_features: cached_features,
-      count: count,
-    },
-  });
+    yield put({
+      type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
+      payload: {
+        features: [...updated_extents, newExtent],
+        fetch_geo: newExtent,
+        timestamps: timestamps,
+        old_features: cached_features,
+        count: count,
+      },
+    });
+  } catch (error: any) {
+    yield put({
+      type: BUFFERED_EXTENTS_UPDATE_FAIL,
+      payload: error
+     });
+   }
 }
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
@@ -279,12 +294,12 @@ function* handle_BUFFERED_EXTENTS_UPDATE_SUCCESS(action: any) {
   const newData: any = [];
 
   yield getGeoJSON(
-    "WHSE_WATER_MANAGEMENT.WLS_WATER_RESERVES_POLY",
-    fetch_geo
-  ).then((returnVal) => {
-    returnVal.features.map((feature: any) => {
-      feature.properties.extent_id = fetch_geo.properties.timestamp;
-      newData.push(feature);
+      "WHSE_WATER_MANAGEMENT.WLS_WATER_RESERVES_POLY",
+      fetch_geo
+    ).then((returnVal) => {
+      returnVal.features.map((feature: any) => {
+        feature.properties.extent_id = fetch_geo.properties.timestamp;
+        newData.push(feature);
     });
   });
 

@@ -32,6 +32,7 @@
     "react-leaflet": "3.2.2",
     "react-redux": "^8.0.2",
     "react-scripts": "^5.0.0",
+    "redux-devtools-extension": "^2.13.9",
     "redux-logger": "^3.0.6",
     "redux-saga": "^1.2.1",
     "reproject": "^1.2.6",
