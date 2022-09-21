@@ -28,10 +28,12 @@ function* handle_BUFFERED_EXTENTS_INITIALIZE_REQUEST(action: any) {
   const { extents } = action.payload;
 
   try {
+    const bufferedExtents = yield select(selectBufferedExtents);
     yield put({
       type: BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
       payload: {
         features: extents,
+        count: bufferedExtents.count + 1,
       },
     });
   } catch (error: any) {
@@ -200,7 +202,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
             features: [...updated_extents, newExtent],
             fetch_geo: newExtent,
             timestamps: timestamps,
-            count: bufferedExtents.count,
+            count: bufferedExtents.count + 1,
           },
         });
       }
