@@ -67,7 +67,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
     yield put({
       type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
       payload: {
-        features: updated_extents,
+        features: [...updated_extents, newExtent],
         fetch_geo: newExtent,
         timestamps: timestamps,
         count: bufferedExtents.count + 1,

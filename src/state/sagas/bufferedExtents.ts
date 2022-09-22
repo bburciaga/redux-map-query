@@ -16,7 +16,7 @@ import {
   handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS,
   handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS,
   handle_BUFFERED_EXTENTS_UPDATE_SUCCESS,
-} from "../channels/bufferedExtents";
+} from "../handlers/bufferedExtents";
 
 export default function* bufferedExtentsSaga() {
   yield all([
