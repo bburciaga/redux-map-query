@@ -392,3 +392,5 @@ export default function* bufferedExtentsSaga() {
     ),
   ]);
 }
+
+export { handle_BUFFERED_EXTENTS_INITIALIZE_REQUEST };

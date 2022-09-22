@@ -10,7 +10,8 @@ import createSagaMiddleware from "@redux-saga/core";
 import bufferedExtentsSaga from "./state/sagas/bufferedExtents";
 import { createCachedDataReducer } from "./state/reducers/cachedData";
 import cachedDataSaga from "./state/sagas/cachedData";
-import { composeWithDevTools } from 'redux-devtools-extension';
+import { composeWithDevTools } from "redux-devtools-extension";
+import { watch_BUFFERED_EXTENTS_INITIALIZE_REQUEST } from "./state/channels/bufferedExtents";
 
 const sagaMiddlewares = createSagaMiddleware();
 
@@ -28,6 +29,7 @@ export const setupStore = () => {
 
   sagaMiddlewares.run(bufferedExtentsSaga);
   sagaMiddlewares.run(cachedDataSaga);
+  sagaMiddlewares.run(watch_BUFFERED_EXTENTS_INITIALIZE_REQUEST);
 
   return store;
 };
