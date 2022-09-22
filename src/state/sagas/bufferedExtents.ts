@@ -9,7 +9,7 @@ import {
 } from "../actions";
 import { all, takeEvery } from "redux-saga/effects";
 import {
-  handle_BUFFERED_EXTENTS_INITIALIZE_REQUEST,
+  // handle_BUFFERED_EXTENTS_INITIALIZE_REQUEST,
   handle_BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
   handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS,
   handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION,
@@ -20,10 +20,10 @@ import {
 
 export default function* bufferedExtentsSaga() {
   yield all([
-    takeEvery(
-      BUFFERED_EXTENTS_INITIALIZE_REQUEST,
-      handle_BUFFERED_EXTENTS_INITIALIZE_REQUEST
-    ),
+    // takeEvery(
+    //   BUFFERED_EXTENTS_INITIALIZE_REQUEST,
+    //   handle_BUFFERED_EXTENTS_INITIALIZE_REQUEST
+    // ),
     takeEvery(
       BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
       handle_BUFFERED_EXTENTS_INITIALIZE_SUCCESS

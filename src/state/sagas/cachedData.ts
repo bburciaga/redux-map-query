@@ -6,11 +6,11 @@ import {
 import { handle_CACHED_DATA_UPDATE_REQUEST } from "../handlers/cachedData";
 
 export default function* cachedDataSaga() {
-  yield all([
-    takeEvery(CACHED_DATA_UPDATE_REQUEST, handle_CACHED_DATA_UPDATE_REQUEST),
-    takeEvery(
-      CACHED_DATA_INITIALIZE_REQUEST,
-      handle_CACHED_DATA_UPDATE_REQUEST
-    ),
-  ]);
+  // yield all([
+  // takeEvery(CACHED_DATA_UPDATE_REQUEST, handle_CACHED_DATA_UPDATE_REQUEST),
+  // takeEvery(
+  //   CACHED_DATA_INITIALIZE_REQUEST,
+  //   handle_CACHED_DATA_UPDATE_REQUEST
+  // ),
+  // ]);
 }

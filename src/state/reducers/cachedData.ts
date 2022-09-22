@@ -8,6 +8,7 @@ import {
 export class CachedDataState {
   initialized: boolean;
   data: any;
+  count: number;
 
   constructor() {
     this.initialized = false;
@@ -15,6 +16,7 @@ export class CachedDataState {
       type: "FeatureCollection",
       features: [],
     };
+    this.count = 0;
   }
 }
 const initialState = new CachedDataState();
@@ -30,12 +32,14 @@ function createCachedDataReducer(): (
           ...state,
           initialized: true,
           data: action.payload.feature_collection,
+          count: action.payload.count,
         };
       }
       case CACHED_DATA_UPDATE_SUCCESS: {
         return {
           ...state,
           data: action.payload.feature_collection,
+          count: action.payload.count,
         };
       }
       case CACHED_DATA_INITIALIZE_FAIL:

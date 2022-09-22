@@ -1,5 +1,9 @@
+import { useSelector } from "react-redux";
+import { selectCachedData } from "../../../state/reducers/cachedData";
+
 const InfoBox = (props: any) => {
   const { count } = props;
+  const cachedData = useSelector(selectCachedData);
 
   return (
     <div
@@ -17,6 +21,7 @@ const InfoBox = (props: any) => {
       }}
     >
       <p style={{ margin: 15 }}>Page Render Count: {count}</p>
+      <p style={{ margin: 15 }}>Cached Data Render Count: {cachedData.count}</p>
     </div>
   );
 };

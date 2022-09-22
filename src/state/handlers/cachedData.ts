@@ -9,7 +9,7 @@ import {
 import { selectCachedData } from "../reducers/cachedData";
 
 function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
-  const { fetch_geo, timestamps } = action.payload;
+  const { fetch_geo, timestamps, initialize } = action.payload;
 
   try {
     const newData: any = [];
@@ -39,7 +39,7 @@ function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
       }
     }
 
-    if (cachedData.initialized) {
+    if (!initialize) {
       yield put({
         type: CACHED_DATA_UPDATE_SUCCESS,
         payload: {
@@ -47,6 +47,7 @@ function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
             type: "FeatureCollection",
             features: [...tempFeatures, ...newData],
           },
+          count: cachedData.count + 1,
         },
       });
     } else {
@@ -57,6 +58,7 @@ function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
             type: "FeatureCollection",
             features: newData,
           },
+          count: cachedData.count + 1,
         },
       });
     }

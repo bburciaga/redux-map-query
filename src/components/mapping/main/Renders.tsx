@@ -56,10 +56,10 @@ export const Renders = () => {
       /* Buffered Extent Actions */
       if (!bufferedExtents.initialized) {
         dispatch({
-          type: BUFFERED_EXTENTS_INITIALIZE_REQUEST,
+          type: BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS_REQUEST,
           payload: {
             aGeo: userGeo,
-            extents: [createExtent(map.getCenter())],
+            extents: null,
             intersects: null,
           },
         });
