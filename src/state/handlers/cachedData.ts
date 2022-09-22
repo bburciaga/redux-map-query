@@ -8,41 +8,6 @@ import {
 } from "../actions";
 import { selectCachedData } from "../reducers/cachedData";
 
-function* handle_CACHED_DATA_INITIALIZE_REQUEST(action: any) {
-  const { fetch_geo } = action.payload;
-
-  try {
-    const newData: any = [];
-
-    yield getGeoJSON(
-      "WHSE_WATER_MANAGEMENT.WLS_WATER_RESERVES_POLY",
-      fetch_geo
-    ).then((returnVal) => {
-      returnVal.features.map((feature: any) => {
-        feature.properties.extent_id = fetch_geo.properties.timestamp;
-        newData.push(feature);
-      });
-    });
-
-    yield put({
-      type: CACHED_DATA_INITIALIZE_SUCCESS,
-      payload: {
-        feature_collection: {
-          type: "FeatureCollection",
-          features: newData,
-        },
-      },
-    });
-  } catch (error: any) {
-    yield put({
-      type: CACHED_DATA_INITIALIZE_FAIL,
-      payload: {
-        error: error,
-      },
-    });
-  }
-}
-
 function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
   const { fetch_geo, timestamps } = action.payload;
 
@@ -74,15 +39,27 @@ function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
       }
     }
 
-    yield put({
-      type: CACHED_DATA_UPDATE_SUCCESS,
-      payload: {
-        feature_collection: {
-          type: "FeatureCollection",
-          features: [...tempFeatures, ...newData],
+    if (cachedData.initialized) {
+      yield put({
+        type: CACHED_DATA_UPDATE_SUCCESS,
+        payload: {
+          feature_collection: {
+            type: "FeatureCollection",
+            features: [...tempFeatures, ...newData],
+          },
         },
-      },
-    });
+      });
+    } else {
+      yield put({
+        type: CACHED_DATA_INITIALIZE_SUCCESS,
+        payload: {
+          feature_collection: {
+            type: "FeatureCollection",
+            features: newData,
+          },
+        },
+      });
+    }
   } catch (error: any) {
     yield put({
       type: CACHED_DATA_UPDATE_FAIL,
@@ -93,7 +70,4 @@ function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
   }
 }
 
-export {
-  handle_CACHED_DATA_INITIALIZE_REQUEST,
-  handle_CACHED_DATA_UPDATE_REQUEST,
-};
+export { handle_CACHED_DATA_UPDATE_REQUEST };
