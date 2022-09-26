@@ -2,6 +2,8 @@ import { center, difference, multiPolygon } from "@turf/turf";
 import { put, select } from "redux-saga/effects";
 import {
   createExtent,
+  createFeatureCollection,
+  createMultiPolyFromIntersects,
   getClosestExtent,
   getDirectionFromBound,
   getDirectionFromCenter,
@@ -10,35 +12,18 @@ import {
 } from "../../helpers/geometry";
 import {
   BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
+  BUFFERED_EXTENTS_REMOVE_FURTHEST_FAIL,
+  BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST,
+  BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS,
   BUFFERED_EXTENTS_UPDATE_FAIL,
   BUFFERED_EXTENTS_UPDATE_SUCCESS,
   CACHED_DATA_INITIALIZE_FAIL,
+  CACHED_DATA_REMOVE_FURTHEST_FAIL,
+  CACHED_DATA_REMOVE_FURTHEST_REQUEST,
   CACHED_DATA_UPDATE_FAIL,
   CACHED_DATA_UPDATE_REQUEST,
 } from "../actions";
 import { selectBufferedExtents } from "../reducers/bufferedExtents";
-
-// function* handle_BUFFERED_EXTENTS_INITIALIZE_REQUEST(action: any) {
-//   const { extents } = action.payload;
-
-//   try {
-//     const bufferedExtents = yield select(selectBufferedExtents);
-//     yield put({
-//       type: BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
-//       payload: {
-//         features: extents,
-//         count: bufferedExtents.count + 1,
-//       },
-//     });
-//   } catch (error: any) {
-//     yield put({
-//       type: BUFFERED_EXTENTS_INITIALIZE_FAIL,
-//       payload: {
-//         error: error,
-//       },
-//     });
-//   }
-// }
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
   const { aGeo } = action.payload;
@@ -59,17 +44,11 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
         direction
       );
 
-      const { updated_extents, timestamps } = removeFurthestExtent(
-        aGeo.properties.center,
-        bufferedExtents.data.features
-      );
-
       yield put({
         type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
         payload: {
-          features: [...updated_extents, newExtent],
+          feature_collection: createFeatureCollection([...bufferedExtents.data.features, newExtent]),
           fetch_geo: newExtent,
-          timestamps: timestamps,
           count: bufferedExtents.count + 1,
         },
       });
@@ -78,7 +57,8 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
       yield put({
         type: BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
         payload: {
-          features: [newExtent],
+          feature_collection: createFeatureCollection([newExtent]),
+          fetch_geo: newExtent,
           count: bufferedExtents.count + 1,
         },
       });
@@ -104,17 +84,11 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
       );
       const newExtent = getNextExtent(action.payload.aGeo, closestExtent);
 
-      const { updated_extents, timestamps } = removeFurthestExtent(
-        aGeo.properties.center,
-        bufferedExtents.data.features
-      );
-
       yield put({
         type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
         payload: {
-          features: [...updated_extents, newExtent],
+          feature_collection: createFeatureCollection([...bufferedExtents.data.features, newExtent]),
           fetch_geo: newExtent,
-          timestamps: timestamps,
           count: bufferedExtents.count + 1,
         },
       });
@@ -129,17 +103,44 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
   }
 }
 
+function createExtentBasedOnDifference (diffCenter: {lat: number, lng: number}, multipoly: any, closestExtent: any) {
+  // check north
+  if (
+    diffCenter.lat > multipoly.properties.center.lat &&
+    diffCenter.lat > closestExtent.properties.center.lat
+  ) {
+    return createExtent(closestExtent.properties.center, "n");
+  }
+  // check south
+  if (
+    diffCenter.lat < multipoly.properties.center.lat &&
+    diffCenter.lat < closestExtent.properties.center.lat
+  ) {
+    return createExtent(closestExtent.properties.center, "s");
+  }
+  // check east
+  if (
+    diffCenter.lng > multipoly.properties.center.lng &&
+    diffCenter.lng > closestExtent.properties.center.lng
+  ) {
+    return createExtent(closestExtent.properties.center, "e");
+  }
+  // check west
+  if (
+    diffCenter.lng < multipoly.properties.center.lng &&
+    diffCenter.lng < closestExtent.properties.center.lng
+  ) {
+    return createExtent(closestExtent.properties.center, "w");
+  }
+}
+
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
   const { aGeo, intersects } = action.payload;
 
   try {
     const bufferedExtents = yield select(selectBufferedExtents);
 
-    const intersectsMultiPoly: any = multiPolygon(
-      intersects.map((feature: any) => {
-        return feature.geometry.coordinates;
-      })
-    );
+    const intersectsMultiPoly: any = createMultiPolyFromIntersects(intersects);
 
     if (difference(aGeo, intersectsMultiPoly)) {
       const closestExtent = getClosestExtent(
@@ -161,52 +162,14 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
           }
         : null;
 
-      let newExtent: any;
-      // check north
-      if (
-        diffCenter &&
-        diffCenter.lat > intersectsMultiPoly.properties.center.lat &&
-        diffCenter.lat > closestExtent.properties.center.lat
-      ) {
-        newExtent = createExtent(closestExtent.properties.center, "n");
-      }
-      // check south
-      if (
-        diffCenter &&
-        diffCenter.lat < intersectsMultiPoly.properties.center.lat &&
-        diffCenter.lat < closestExtent.properties.center.lat
-      ) {
-        newExtent = createExtent(closestExtent.properties.center, "s");
-      }
-      // check east
-      if (
-        diffCenter &&
-        diffCenter.lng > intersectsMultiPoly.properties.center.lng &&
-        diffCenter.lng > closestExtent.properties.center.lng
-      ) {
-        newExtent = createExtent(closestExtent.properties.center, "e");
-      }
-      // check west
-      if (
-        diffCenter &&
-        diffCenter.lng < intersectsMultiPoly.properties.center.lng &&
-        diffCenter.lng < closestExtent.properties.center.lng
-      ) {
-        newExtent = createExtent(closestExtent.properties.center, "w");
-      }
-
-      const { updated_extents, timestamps } = yield removeFurthestExtent(
-        aGeo.properties.center,
-        bufferedExtents.data.features
-      );
+      const newExtent: any = createExtentBasedOnDifference(diffCenter, intersectsMultiPoly, closestExtent);
 
       if (newExtent) {
         yield put({
           type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
           payload: {
-            features: [...updated_extents, newExtent],
+            feature_collection: createFeatureCollection([...bufferedExtents.data.features, newExtent]),
             fetch_geo: newExtent,
-            timestamps: timestamps,
             count: bufferedExtents.count + 1,
           },
         });
@@ -228,11 +191,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
   try {
     const bufferedExtents = yield select(selectBufferedExtents);
 
-    const intersectsMultiPoly: any = multiPolygon(
-      intersects.map((feature: any) => {
-        return feature.geometry.coordinates;
-      })
-    );
+    const intersectsMultiPoly: any = createMultiPolyFromIntersects(intersects);
 
     if (difference(aGeo, intersectsMultiPoly)) {
       // check where each geo is
@@ -264,14 +223,14 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
         });
       };
 
-      const getNextExtent = (direction: string) => {
+      const getCornerExtent = (direction: string) => {
         if (adjacent.properties.direction.includes("n")) {
           return createExtent(
             adjacent.properties.center,
             direction[0] === "n" ? direction[1] : direction[0]
           );
         }
-        if (adjacent.properties.direction.includes("s")) {
+        else {
           return createExtent(
             adjacent.properties.center,
             direction[0] === "s" ? direction[1] : direction[0]
@@ -284,32 +243,26 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
       // once all geos are obtained check where to put the next geometry
       if (!coolstring.includes("ne")) {
         assignAdjacent("nw", "se");
-        newExtent = getNextExtent("ne");
+        newExtent = getCornerExtent("ne");
       }
       if (!coolstring.includes("nw")) {
         assignAdjacent("ne", "sw");
-        newExtent = getNextExtent("nw");
+        newExtent = getCornerExtent("nw");
       }
       if (!coolstring.includes("se")) {
         assignAdjacent("ne", "sw");
-        newExtent = getNextExtent("se");
+        newExtent = getCornerExtent("se");
       }
       if (!coolstring.includes("sw")) {
         assignAdjacent("nw", "se");
-        newExtent = getNextExtent("sw");
+        newExtent = getCornerExtent("sw");
       }
-
-      const { updated_extents, timestamps } = removeFurthestExtent(
-        aGeo.properties.center,
-        bufferedExtents.data.features
-      );
 
       yield put({
         type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
         payload: {
-          features: [...updated_extents, newExtent],
+          feature_collection: createFeatureCollection([...bufferedExtents.data.features, newExtent]),
           fetch_geo: newExtent,
-          timestamps: timestamps,
           count: bufferedExtents.count + 1,
         },
       });
@@ -325,14 +278,13 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
 }
 
 function* handle_BUFFERED_EXTENTS_INITIALIZE_SUCCESS(action: any) {
-  const { features } = action.payload;
+  const { fetch_geo } = action.payload;
 
   try {
     yield put({
       type: CACHED_DATA_UPDATE_REQUEST,
       payload: {
-        fetch_geo: features[0],
-        timestamps: [features[0].properties.timestamp],
+        fetch_geo: fetch_geo,
         initialize: true,
       },
     });
@@ -347,14 +299,13 @@ function* handle_BUFFERED_EXTENTS_INITIALIZE_SUCCESS(action: any) {
 }
 
 function* handle_BUFFERED_EXTENTS_UPDATE_SUCCESS(action: any) {
-  const { fetch_geo, timestamps } = action.payload;
+  const { fetch_geo } = action.payload;
 
   try {
     yield put({
       type: CACHED_DATA_UPDATE_REQUEST,
       payload: {
         fetch_geo: fetch_geo,
-        timestamps: timestamps,
         initialize: false,
       },
     });
@@ -368,8 +319,51 @@ function* handle_BUFFERED_EXTENTS_UPDATE_SUCCESS(action: any) {
   }
 }
 
+function* handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST(action: any) {
+  const { aGeo } = action.payload;
+  const bufferedExtents = yield select(selectBufferedExtents);
+
+  const { updated_extents, timestamps } = removeFurthestExtent(
+    aGeo.properties.center,
+    bufferedExtents.data.features
+  );
+
+  try {
+    yield put({
+      type: BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS,
+      payload: {
+        feature_collection: createFeatureCollection(updated_extents),
+        timestamps: timestamps
+      }
+    })
+  } catch (error: any) {
+    yield put({
+      type: BUFFERED_EXTENTS_REMOVE_FURTHEST_FAIL
+    })
+  }
+}
+
+function* handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS(action: any) {
+  const { timestamps } = action.payload;
+
+  try {
+    yield put({
+      type: CACHED_DATA_REMOVE_FURTHEST_REQUEST,
+      payload: {
+        timestamps: timestamps
+      }
+    });
+  } catch (error: any) {
+    yield put({
+      type: CACHED_DATA_REMOVE_FURTHEST_FAIL,
+      payload: {
+        error: error
+      }
+    });
+  }
+}
+
 export {
-  // handle_BUFFERED_EXTENTS_INITIALIZE_REQUEST,
   handle_BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
   handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS,
   handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION,

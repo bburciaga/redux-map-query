@@ -33,20 +33,14 @@ function createBufferedExtentsReducer(): (
         return {
           ...state,
           initialized: true,
-          data: {
-            type: "FeatureCollection",
-            features: action.payload.features,
-          },
+          data: action.payload.feature_collection,
           count: action.payload.count,
         };
       }
       case BUFFERED_EXTENTS_UPDATE_SUCCESS: {
         return {
           ...state,
-          data: {
-            type: "FeatureCollection",
-            features: action.payload.features,
-          },
+          data: action.payload.feature_collection,
           count: action.payload.count,
         };
       }

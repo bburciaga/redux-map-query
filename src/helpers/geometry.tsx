@@ -10,19 +10,34 @@ import L, { LatLngBounds } from "leaflet";
 const length = 0.745201235056549;
 const width = 1.135711669921875;
 
+function createFeatureCollection(features: any[]) {
+  return {
+    type: "FeatureCollection",
+    features: features
+  }
+}
+
+function createMultiPolyFromIntersects(intersects: any[]) {
+  return multiPolygon(
+    intersects.map((feature: any) => {
+      return feature.geometry.coordinates;
+    })
+  );
+}
+
 /**
  * Used to generate array of numbers to be used for rectangle GeoJSON object
  * @param center position of map or GeoJSON object
  * @returns number [][][]
  */
-function createBoundFromCenter(center: { lat: number; lng: number }) {
+function createBoundFromCenter(aCenter: { lat: number; lng: number }) {
   return [
     [
-      [center.lng + width, center.lat + length],
-      [center.lng + width, center.lat - length],
-      [center.lng - width, center.lat - length],
-      [center.lng - width, center.lat + length],
-      [center.lng + width, center.lat + length],
+      [aCenter.lng + width, aCenter.lat + length],
+      [aCenter.lng + width, aCenter.lat - length],
+      [aCenter.lng - width, aCenter.lat - length],
+      [aCenter.lng - width, aCenter.lat + length],
+      [aCenter.lng + width, aCenter.lat + length],
     ],
   ];
 }
@@ -57,37 +72,37 @@ function createUserGeo(latLngBounds: LatLngBounds) {
  */
 function createPolygonFromArray(
   coordArr: number[][][],
-  center: { lat: number; lng: number }
+  aCenter: { lat: number; lng: number }
 ) {
   const aGeo: any = polygon(coordArr);
-  aGeo.properties.center = center;
+  aGeo.properties.center = aCenter;
 
-  aGeo.properties.center = center;
+  aGeo.properties.center = aCenter;
   aGeo.properties.northEast = {
-    lat: center.lat + length,
-    lng: center.lng + width,
+    lat: aCenter.lat + length,
+    lng: aCenter.lng + width,
   };
   aGeo.properties.southWest = {
-    lat: center.lat - length,
-    lng: center.lng - width,
+    lat: aCenter.lat - length,
+    lng: aCenter.lng - width,
   };
   aGeo.properties.timestamp = Date.now();
 
   return aGeo;
 }
 
-function getNewCenter(center: { lat: number; lng: number }, direction: string) {
+function getNewCenter(aCenter: { lat: number; lng: number }, direction: string) {
   switch (direction[0]) {
     case "n":
-      return { lat: center.lat + 2 * length, lng: center.lng };
+      return { lat: aCenter.lat + 2 * length, lng: aCenter.lng };
     case "s":
-      return { lat: center.lat - 2 * length, lng: center.lng };
+      return { lat: aCenter.lat - 2 * length, lng: aCenter.lng };
     case "e":
-      return { lat: center.lat, lng: center.lng + 2 * width };
+      return { lat: aCenter.lat, lng: aCenter.lng + 2 * width };
     case "w":
-      return { lat: center.lat, lng: center.lng - 2 * width };
+      return { lat: aCenter.lat, lng: aCenter.lng - 2 * width };
   }
-  return center;
+  return aCenter;
 }
 
 /**
@@ -97,21 +112,19 @@ function getNewCenter(center: { lat: number; lng: number }, direction: string) {
  * @returns geojson
  */
 function createExtent(
-  center: { lat: number; lng: number },
+  aCenter: { lat: number; lng: number },
   direction?: string
 ) {
-  let newCenter: { lat: number; lng: number } = center;
+  let newCenter: { lat: number; lng: number } = aCenter;
   if (direction) {
-    newCenter = getNewCenter(center, direction);
+    newCenter = getNewCenter(aCenter, direction);
     if (direction.length > 1)
       newCenter = getNewCenter(newCenter, direction.charAt(1));
   }
 
   const tempBound: any = createBoundFromCenter(newCenter);
 
-  const tempGeo = createPolygonFromArray(tempBound, newCenter);
-
-  return tempGeo;
+  return createPolygonFromArray(tempBound, newCenter);
 }
 
 function getNextExtent(userGeo: any, extentGeo: any) {
@@ -229,7 +242,7 @@ function getDirectionFromBound(
 }
 
 function removeFurthestExtent(
-  center: { lat: number; lng: number },
+  aCenter: { lat: number; lng: number },
   extents: any[]
 ) {
   const tempExtents = extents;
@@ -245,7 +258,7 @@ function removeFurthestExtent(
       const tempCenter = tempExtents[i].properties.center;
       const tempDistance = distance(
         [tempCenter.lng, tempCenter.lat],
-        [center.lng, center.lat]
+        [aCenter.lng, aCenter.lat]
       );
       if (furthestDistance < tempDistance) {
         furthestDistance = tempDistance;
@@ -254,7 +267,7 @@ function removeFurthestExtent(
     }
 
     if (index > -1) {
-      const temp: any = tempExtents.splice(index, 1);
+      const _temp: any = tempExtents.splice(index, 1);
       timestamps.splice(index, 1);
     }
   }
@@ -264,6 +277,8 @@ function removeFurthestExtent(
 export {
   createUserGeo,
   createExtent,
+  createFeatureCollection,
+  createMultiPolyFromIntersects,
   getNextExtent,
   getClosestExtent,
   getDirectionFromBound,

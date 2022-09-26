@@ -20,10 +20,6 @@ import {
 
 export default function* bufferedExtentsSaga() {
   yield all([
-    // takeEvery(
-    //   BUFFERED_EXTENTS_INITIALIZE_REQUEST,
-    //   handle_BUFFERED_EXTENTS_INITIALIZE_REQUEST
-    // ),
     takeEvery(
       BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
       handle_BUFFERED_EXTENTS_INITIALIZE_SUCCESS
