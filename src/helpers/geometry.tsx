@@ -249,10 +249,12 @@ function removeFurthestExtent(
   const timestamps = tempExtents.map((e) => {
     return e.properties.timestamp;
   });
+  let update_cached: boolean = false;
 
-  if (tempExtents.length > 4) {
+  if (tempExtents.length > 5) {
     let furthestDistance = -1;
     let index = -1;
+    update_cached = true;
 
     for (let i = 0; i < tempExtents.length; i++) {
       const tempCenter = tempExtents[i].properties.center;
@@ -271,7 +273,7 @@ function removeFurthestExtent(
       timestamps.splice(index, 1);
     }
   }
-  return { updated_extents: tempExtents, timestamps: timestamps };
+  return { updated_extents: tempExtents, update_cached: update_cached, timestamps: timestamps };
 }
 
 export {

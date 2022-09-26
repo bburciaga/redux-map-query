@@ -12,6 +12,7 @@ import {
 } from "../../helpers/geometry";
 import {
   BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
+  BUFFERED_EXTENTS_NOTHING_TO_UPDATE,
   BUFFERED_EXTENTS_REMOVE_FURTHEST_FAIL,
   BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST,
   BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS,
@@ -92,6 +93,10 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
           count: bufferedExtents.count + 1,
         },
       });
+    } else {
+      yield put({
+        type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE
+      });
     }
   } catch (error: any) {
     yield put({
@@ -164,16 +169,18 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
 
       const newExtent: any = createExtentBasedOnDifference(diffCenter, intersectsMultiPoly, closestExtent);
 
-      if (newExtent) {
-        yield put({
-          type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
-          payload: {
-            feature_collection: createFeatureCollection([...bufferedExtents.data.features, newExtent]),
-            fetch_geo: newExtent,
-            count: bufferedExtents.count + 1,
-          },
-        });
-      }
+      yield put({
+        type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
+        payload: {
+          feature_collection: createFeatureCollection([...bufferedExtents.data.features, newExtent]),
+          fetch_geo: newExtent,
+          count: bufferedExtents.count + 1,
+        },
+      });
+    } else {
+      yield put({
+        type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE
+      });
     }
   } catch (error) {
     yield put({
@@ -320,39 +327,51 @@ function* handle_BUFFERED_EXTENTS_UPDATE_SUCCESS(action: any) {
 }
 
 function* handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST(action: any) {
-  const { aGeo } = action.payload;
+  const { current_extent } = action.payload;
   const bufferedExtents = yield select(selectBufferedExtents);
 
-  const { updated_extents, timestamps } = removeFurthestExtent(
-    aGeo.properties.center,
+  const { updated_extents, update_cached, timestamps } = removeFurthestExtent(
+    current_extent.properties.center,
     bufferedExtents.data.features
   );
 
   try {
-    yield put({
-      type: BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS,
-      payload: {
-        feature_collection: createFeatureCollection(updated_extents),
-        timestamps: timestamps
-      }
-    })
+    if (update_cached) {
+      yield put({
+        type: BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS,
+        payload: {
+          feature_collection: createFeatureCollection(updated_extents),
+          update_cached: update_cached,
+          timestamps: timestamps
+        }
+      })
+    } else {
+      yield put({
+        type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE,
+      });
+    }
   } catch (error: any) {
     yield put({
-      type: BUFFERED_EXTENTS_REMOVE_FURTHEST_FAIL
-    })
+      type: BUFFERED_EXTENTS_REMOVE_FURTHEST_FAIL,
+      payload: {
+        error: error
+      }
+    });
   }
 }
 
 function* handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS(action: any) {
-  const { timestamps } = action.payload;
+  const { timestamps, update_cached } = action.payload;
 
   try {
-    yield put({
-      type: CACHED_DATA_REMOVE_FURTHEST_REQUEST,
-      payload: {
-        timestamps: timestamps
-      }
-    });
+    if (update_cached) {
+      yield put({
+        type: CACHED_DATA_REMOVE_FURTHEST_REQUEST,
+        payload: {
+          timestamps: timestamps
+        }
+      });
+    }
   } catch (error: any) {
     yield put({
       type: CACHED_DATA_REMOVE_FURTHEST_FAIL,
@@ -370,4 +389,6 @@ export {
   handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS,
   handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS,
   handle_BUFFERED_EXTENTS_UPDATE_SUCCESS,
+  handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST,
+  handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS
 };

@@ -1,6 +1,8 @@
 import {
   BUFFERED_EXTENTS_INITIALIZE_FAIL,
   BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
+  BUFFERED_EXTENTS_REMOVE_FURTHEST_FAIL,
+  BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS,
   BUFFERED_EXTENTS_UPDATE_FAIL,
   BUFFERED_EXTENTS_UPDATE_SUCCESS,
 } from "../actions";
@@ -37,7 +39,8 @@ function createBufferedExtentsReducer(): (
           count: action.payload.count,
         };
       }
-      case BUFFERED_EXTENTS_UPDATE_SUCCESS: {
+      case BUFFERED_EXTENTS_UPDATE_SUCCESS: 
+      case BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS: {
         return {
           ...state,
           data: action.payload.feature_collection,
@@ -45,7 +48,8 @@ function createBufferedExtentsReducer(): (
         };
       }
       case BUFFERED_EXTENTS_INITIALIZE_FAIL:
-      case BUFFERED_EXTENTS_UPDATE_FAIL: {
+      case BUFFERED_EXTENTS_UPDATE_FAIL:
+      case BUFFERED_EXTENTS_REMOVE_FURTHEST_FAIL: {
         return {
           ...state,
           error: action.payload.error,

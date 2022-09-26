@@ -1,6 +1,8 @@
 import {
   CACHED_DATA_INITIALIZE_FAIL,
   CACHED_DATA_INITIALIZE_SUCCESS,
+  CACHED_DATA_REMOVE_FURTHEST_FAIL,
+  CACHED_DATA_REMOVE_FURTHEST_SUCCESS,
   CACHED_DATA_UPDATE_FAIL,
   CACHED_DATA_UPDATE_SUCCESS,
 } from "../actions";
@@ -35,7 +37,8 @@ function createCachedDataReducer(): (
           count: action.payload.count,
         };
       }
-      case CACHED_DATA_UPDATE_SUCCESS: {
+      case CACHED_DATA_UPDATE_SUCCESS:
+      case CACHED_DATA_REMOVE_FURTHEST_SUCCESS: {
         return {
           ...state,
           data: action.payload.feature_collection,
@@ -43,7 +46,8 @@ function createCachedDataReducer(): (
         };
       }
       case CACHED_DATA_INITIALIZE_FAIL:
-      case CACHED_DATA_UPDATE_FAIL: {
+      case CACHED_DATA_UPDATE_FAIL:
+      case CACHED_DATA_REMOVE_FURTHEST_FAIL: {
         return {
           ...state,
           error: action.payload.error,

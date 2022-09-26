@@ -2,6 +2,8 @@ import { put, select } from "redux-saga/effects";
 import { getGeoJSON } from "../../DataBCShapes";
 import { createFeatureCollection } from "../../helpers/geometry";
 import {
+  BUFFERED_EXTENTS_REMOVE_FURTHEST_FAIL,
+  BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST,
   CACHED_DATA_INITIALIZE_SUCCESS,
   CACHED_DATA_REMOVE_FURTHEST_FAIL,
   CACHED_DATA_REMOVE_FURTHEST_SUCCESS,
@@ -33,6 +35,7 @@ function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
         type: CACHED_DATA_UPDATE_SUCCESS,
         payload: {
           feature_collection: createFeatureCollection([...cachedData.data.features, ...newData]),
+          current_extent: fetch_geo,
           count: cachedData.count + 1,
         },
       });
@@ -51,6 +54,22 @@ function* handle_CACHED_DATA_UPDATE_REQUEST(action: any) {
       payload: {
         error: error,
       },
+    });
+  }
+}
+
+function* handle_CACHED_DATA_UPDATE_SUCCESS (action: any) {
+  try {
+    yield put({
+      type: BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST,
+      payload: action.payload
+    });
+  } catch (error: any) {
+    yield put({
+      type: BUFFERED_EXTENTS_REMOVE_FURTHEST_FAIL,
+      payload: {
+        error: error
+      }
     });
   }
 }
@@ -90,4 +109,4 @@ function* handle_CACHED_DATA_REMOVE_FURTHEST_REQUEST(action: any) {
   }
 }
 
-export { handle_CACHED_DATA_UPDATE_REQUEST };
+export { handle_CACHED_DATA_UPDATE_REQUEST, handle_CACHED_DATA_UPDATE_SUCCESS, handle_CACHED_DATA_REMOVE_FURTHEST_REQUEST };
