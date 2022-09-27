@@ -1,5 +1,4 @@
 import {
-  BUFFERED_EXTENTS_INITIALIZE_REQUEST,
   BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
   BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST,
   BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS,
@@ -22,6 +21,10 @@ import {
   handle_BUFFERED_EXTENTS_UPDATE_SUCCESS,
 } from "../handlers/bufferedExtents";
 
+/**
+ * To be exported
+ * Creates saga for BUFFERED EXTENTS to utilize the handlers
+ */
 export default function* bufferedExtentsSaga() {
   yield all([
     takeEvery(
@@ -55,6 +58,6 @@ export default function* bufferedExtentsSaga() {
     takeEvery(
       BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS,
       handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS
-    )
+    ),
   ]);
 }

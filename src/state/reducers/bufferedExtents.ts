@@ -25,6 +25,11 @@ class BufferedExtentsState {
 }
 const initialState = new BufferedExtentsState();
 
+/**
+ * To be exported
+ * Creates reducer for BUFFERED EXTENTS
+ * @returns state of reducer
+ */
 function createBufferedExtentsReducer(): (
   BufferedExtentsState: any,
   AnyAction: any
@@ -39,7 +44,7 @@ function createBufferedExtentsReducer(): (
           count: action.payload.count,
         };
       }
-      case BUFFERED_EXTENTS_UPDATE_SUCCESS: 
+      case BUFFERED_EXTENTS_UPDATE_SUCCESS:
       case BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS: {
         return {
           ...state,
@@ -61,6 +66,11 @@ function createBufferedExtentsReducer(): (
   };
 }
 
+/**
+ * Selects object for BUFFERED EXTENTS
+ * @param state
+ * @returns bufferedExtents object
+ */
 const selectBufferedExtents: (state: any) => BufferedExtentsState = (state) =>
   state.bufferedExtents;
 
