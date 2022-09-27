@@ -1,4 +1,4 @@
-import { center, difference, multiPolygon } from "@turf/turf";
+import { center, difference } from "@turf/turf";
 import { put, select } from "redux-saga/effects";
 import {
   createExtent,
@@ -97,7 +97,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
 
   try {
     // In case user starts to leave an extent
-    if (difference(action.payload.aGeo, intersects[0])) {
+    if (difference(aGeo, intersects[0])) {
       // Grab closest extent
       const closestExtent = getClosestExtent(
         aGeo.properties.center,

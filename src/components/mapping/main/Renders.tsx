@@ -1,30 +1,22 @@
-import { intersect } from "@turf/turf";
 import React from "react";
 import { GeoJSON, useMap, useMapEvent } from "react-leaflet";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { createExtent, createUserGeo } from "../../../helpers/geometry";
+import { createUserGeo } from "../../../helpers/geometry";
 import {
-  BUFFERED_EXTENTS_INITIALIZE_REQUEST,
-  BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS_REQUEST,
-  BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTIONS_REQUEST,
-  BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS_REQUEST,
-  BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS_REQUEST,
   USER_BOUND_INITIALIZE,
   USER_BOUND_UPDATE_ON_MOVE,
   USER_BOUND_UPDATE_ON_ZOOM,
 } from "../../../state/actions";
-import { selectBufferedExtents } from "../../../state/reducers/bufferedExtents";
-import { selectCachedData } from "../../../state/reducers/cachedData";
 import { selectUserBound } from "../../../state/reducers/userBound";
+import BufferedExtents from "../BufferedExtents";
+import CachedData from "../CachedData";
 import InfoBox from "./InfoBox";
 
 export const Renders = () => {
   const dispatch = useDispatch();
   const map = useMap();
   const userBound = useSelector(selectUserBound);
-  const bufferedExtents = useSelector(selectBufferedExtents);
-  const cachedData = useSelector(selectCachedData);
 
   const countRef = React.useRef(0);
   countRef.current++;
@@ -52,18 +44,6 @@ export const Renders = () => {
           },
         });
       }
-
-      /* Buffered Extent Actions */
-      if (!bufferedExtents.initialized) {
-        dispatch({
-          type: BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS_REQUEST,
-          payload: {
-            aGeo: userGeo,
-            extents: null,
-            intersects: null,
-          },
-        });
-      }
     }
   });
 
@@ -80,69 +60,13 @@ export const Renders = () => {
           },
         });
       }
-
-      /* Buffered Extents */
-      if (bufferedExtents.initialized) {
-        const tempExtents = bufferedExtents.data.features;
-        const intersects: any[] = [];
-
-        tempExtents.forEach((extent: any) => {
-          if (intersect(userGeo, extent)) {
-            intersects.push(extent);
-          }
-        });
-
-        switch (intersects.length) {
-          case 0:
-            dispatch({
-              type: BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS_REQUEST,
-              payload: {
-                aGeo: userGeo,
-                intersects: null,
-              },
-            });
-            break;
-          case 1:
-            dispatch({
-              type: BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTIONS_REQUEST,
-              payload: {
-                aGeo: userGeo,
-                intersects: intersects,
-              },
-            });
-            break;
-          case 2:
-            dispatch({
-              type: BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS_REQUEST,
-              payload: {
-                aGeo: userGeo,
-                intersects: intersects,
-              },
-            });
-            break;
-          case 3:
-            dispatch({
-              type: BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS_REQUEST,
-              payload: {
-                aGeo: userGeo,
-                intersects: intersects,
-              },
-            });
-            break;
-        }
-      }
     }
   });
 
   return (
     <>
-      {cachedData.initialized && (
-        <GeoJSON
-          data={cachedData.data}
-          key={Math.random()}
-          style={{ color: "purple" }}
-        />
-      )}
+      <BufferedExtents />
+      <CachedData />
       <InfoBox count={countRef.current} />
     </>
   );
