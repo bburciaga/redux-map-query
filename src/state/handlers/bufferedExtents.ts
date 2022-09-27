@@ -25,6 +25,11 @@ import {
 } from "../actions";
 import { selectBufferedExtents } from "../reducers/bufferedExtents";
 
+/**
+ * REQUESTS update for either INITIALIZES or UPDATES the BUFFERED
+ * EXTENTS based on no intersecting geometries.
+ * @param action data passed through redux action
+ */
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
   const { aGeo } = action.payload;
   const bufferedExtents = yield select(selectBufferedExtents);
@@ -52,12 +57,15 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
       yield put({
         type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
         payload: {
-          feature_collection: createFeatureCollection([...bufferedExtents.data.features, newExtent]),
+          feature_collection: createFeatureCollection([
+            ...bufferedExtents.data.features,
+            newExtent,
+          ]),
           fetch_geo: newExtent,
           count: bufferedExtents.count + 1,
         },
       });
-    } 
+    }
     // In case the extents have not been initialized
     else {
       // Create Extent based on Center lat lng values
@@ -79,6 +87,10 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
   }
 }
 
+/**
+ * REQUESTS update for BUFFERED EXTENTS if there is one intersecting geometry.
+ * @param action data passed through redux action
+ */
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
   const { aGeo, intersects } = action.payload;
   const bufferedExtents = yield select(selectBufferedExtents);
@@ -97,7 +109,10 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
       yield put({
         type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
         payload: {
-          feature_collection: createFeatureCollection([...bufferedExtents.data.features, newExtent]),
+          feature_collection: createFeatureCollection([
+            ...bufferedExtents.data.features,
+            newExtent,
+          ]),
           fetch_geo: newExtent,
           count: bufferedExtents.count + 1,
         },
@@ -105,7 +120,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
     } else {
       // For logging purposes
       yield put({
-        type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE
+        type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE,
       });
     }
   } catch (error: any) {
@@ -119,13 +134,18 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
 }
 
 /**
- * Helper function used for TWO INTERSECTION function
+ * Helper function used for BUFFERD_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS
+ * handler.
  * @param diffCenter center of difference for geometry
  * @param multipoly multipolygon used for comparison
- * @param closestExtent closest extent in regards to user
- * @returns new extent created by specified direction
+ * @param closestExtent closest geojson in regards to user
+ * @returns new geojson extent
  */
-function createExtentBasedOnDifference (diffCenter: {lat: number, lng: number}, multipoly: any, closestExtent: any) {
+function createExtentBasedOnDifference(
+  diffCenter: { lat: number; lng: number },
+  multipoly: any,
+  closestExtent: any
+) {
   // check north
   if (
     diffCenter.lat > multipoly.properties.center.lat &&
@@ -157,9 +177,8 @@ function createExtentBasedOnDifference (diffCenter: {lat: number, lng: number}, 
 }
 
 /**
- * saga handler for when the user has two intersections and is 
- * leaving the extents
- * @param action 
+ * REQUESTS update for BUFFERED EXTENTS if there is two intersecting geometries.
+ * @param action data passed through redux action
  */
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
   const { aGeo, intersects } = action.payload;
@@ -194,12 +213,19 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
         : null;
 
       // get new extent based on center of difference
-      const newExtent: any = createExtentBasedOnDifference(diffCenter, intersectsMultiPoly, closestExtent);
+      const newExtent: any = createExtentBasedOnDifference(
+        diffCenter,
+        intersectsMultiPoly,
+        closestExtent
+      );
 
       yield put({
         type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
         payload: {
-          feature_collection: createFeatureCollection([...bufferedExtents.data.features, newExtent]),
+          feature_collection: createFeatureCollection([
+            ...bufferedExtents.data.features,
+            newExtent,
+          ]),
           fetch_geo: newExtent,
           count: bufferedExtents.count + 1,
         },
@@ -208,7 +234,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
     // for logging purposes
     else {
       yield put({
-        type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE
+        type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE,
       });
     }
   } catch (error) {
@@ -222,9 +248,68 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
 }
 
 /**
- * saga handler in the case that the user is intersecting three geometries
- * and is leaving the extents
- * @param action 
+ * Helper function used for BUFFERD_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS
+ * handler.
+ * @param directionStrings string array of directions (E.g. "ne", "se", "sw")
+ * @param extentsArr geojson array for buffered extents
+ * @returns new geojson extent
+ */
+function createCornerExtent(directionStrings: any[], extentsArr: any[]) {
+  let adjacent: any;
+
+  const assignAdjacent = (direction1: string, direction2: string) => {
+    extentsArr.forEach((extent: any) => {
+      if (
+        extent.properties.direction === direction1 ||
+        extent.properties.direction === direction2
+      ) {
+        adjacent = extent;
+      }
+    });
+  };
+
+  /**
+   *
+   * @param direction string value (E.g. "ne")
+   * @returns new geojson extent
+   */
+  const getCornerExtent = (direction: string) => {
+    if (adjacent.properties.direction.includes("n")) {
+      return createExtent(
+        adjacent.properties.center,
+        direction[0] === "n" ? direction[1] : direction[0]
+      );
+    }
+    if (adjacent.properties.direction.includes("s")) {
+      return createExtent(
+        adjacent.properties.center,
+        direction[0] === "s" ? direction[1] : direction[0]
+      );
+    }
+  };
+
+  if (!directionStrings.includes("ne")) {
+    assignAdjacent("nw", "se");
+    return getCornerExtent("ne");
+  }
+  if (!directionStrings.includes("nw")) {
+    assignAdjacent("ne", "sw");
+    return getCornerExtent("nw");
+  }
+  if (!directionStrings.includes("se")) {
+    assignAdjacent("ne", "sw");
+    return getCornerExtent("se");
+  }
+  if (!directionStrings.includes("sw")) {
+    assignAdjacent("nw", "se");
+    return getCornerExtent("sw");
+  }
+}
+
+/**
+ * REQUESTS update for BUFFERED EXTENTS if there is three intersecting
+ * geometries.
+ * @param action
  */
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
   const { aGeo, intersects } = action.payload;
@@ -247,62 +332,20 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
 
       let adjacent: any;
 
-      const coolstring =
-        "" +
-        tempExtents.map((b: any) => {
-          return b.properties.direction;
-        });
-
-      const assignAdjacent = (direction1: string, direction2: string) => {
-        tempExtents.forEach((e: any) => {
-          if (
-            e.properties.direction === direction1 ||
-            e.properties.direction === direction2
-          ) {
-            adjacent = e;
-          }
-        });
-      };
-
-      const getCornerExtent = (direction: string) => {
-        if (adjacent.properties.direction.includes("n")) {
-          return createExtent(
-            adjacent.properties.center,
-            direction[0] === "n" ? direction[1] : direction[0]
-          );
-        }
-        if (adjacent.properties.direction.includes("s")) {
-          return createExtent(
-            adjacent.properties.center,
-            direction[0] === "s" ? direction[1] : direction[0]
-          );
-        }
-      };
-
-      let newExtent: any;
+      const coolstring = tempExtents.map((b: any) => {
+        return b.properties.direction;
+      });
 
       // once all geos are obtained check where to put the next geometry
-      if (!coolstring.includes("ne")) {
-        assignAdjacent("nw", "se");
-        newExtent = getCornerExtent("ne");
-      }
-      if (!coolstring.includes("nw")) {
-        assignAdjacent("ne", "sw");
-        newExtent = getCornerExtent("nw");
-      }
-      if (!coolstring.includes("se")) {
-        assignAdjacent("ne", "sw");
-        newExtent = getCornerExtent("se");
-      }
-      if (!coolstring.includes("sw")) {
-        assignAdjacent("nw", "se");
-        newExtent = getCornerExtent("sw");
-      }
+      const newExtent = createCornerExtent(coolstring, tempExtents);
 
       yield put({
         type: BUFFERED_EXTENTS_UPDATE_SUCCESS,
         payload: {
-          feature_collection: createFeatureCollection([...bufferedExtents.data.features, newExtent]),
+          feature_collection: createFeatureCollection([
+            ...bufferedExtents.data.features,
+            newExtent,
+          ]),
           fetch_geo: newExtent,
           count: bufferedExtents.count + 1,
         },
@@ -318,6 +361,11 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
   }
 }
 
+/**
+ * Handler used to dispatch CACHING actions after INITIALIZING the
+ * BUFFERED EXTENTS.
+ * @param action data passed through redux action
+ */
 function* handle_BUFFERED_EXTENTS_INITIALIZE_SUCCESS(action: any) {
   const { fetch_geo } = action.payload;
 
@@ -339,6 +387,11 @@ function* handle_BUFFERED_EXTENTS_INITIALIZE_SUCCESS(action: any) {
   }
 }
 
+/**
+ * Handler used to dispatch CACHING actions after UPDATING the
+ * BUFFERED EXTENTS.
+ * @param action data passed through redux action
+ */
 function* handle_BUFFERED_EXTENTS_UPDATE_SUCCESS(action: any) {
   const { fetch_geo } = action.payload;
 
@@ -360,6 +413,10 @@ function* handle_BUFFERED_EXTENTS_UPDATE_SUCCESS(action: any) {
   }
 }
 
+/**
+ * Updates BUFFERED_EXTENTS by removing the furthest extent.
+ * @param action data passed through redux action
+ */
 function* handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST(action: any) {
   const { current_extent } = action.payload;
   const bufferedExtents = yield select(selectBufferedExtents);
@@ -376,9 +433,9 @@ function* handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST(action: any) {
         payload: {
           feature_collection: createFeatureCollection(updated_extents),
           update_cached: update_cached,
-          timestamps: timestamps
-        }
-      })
+          timestamps: timestamps,
+        },
+      });
     } else {
       yield put({
         type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE,
@@ -388,12 +445,17 @@ function* handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST(action: any) {
     yield put({
       type: BUFFERED_EXTENTS_REMOVE_FURTHEST_FAIL,
       payload: {
-        error: error
-      }
+        error: error,
+      },
     });
   }
 }
 
+/**
+ * Handler used to dispatch CACHING actions after REMOVING the
+ * furthest extent.
+ * @param action data passed through redux action
+ */
 function* handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS(action: any) {
   const { timestamps, update_cached } = action.payload;
 
@@ -402,16 +464,16 @@ function* handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS(action: any) {
       yield put({
         type: CACHED_DATA_REMOVE_FURTHEST_REQUEST,
         payload: {
-          timestamps: timestamps
-        }
+          timestamps: timestamps,
+        },
       });
     }
   } catch (error: any) {
     yield put({
       type: CACHED_DATA_REMOVE_FURTHEST_FAIL,
       payload: {
-        error: error
-      }
+        error: error,
+      },
     });
   }
 }
@@ -424,5 +486,5 @@ export {
   handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS,
   handle_BUFFERED_EXTENTS_UPDATE_SUCCESS,
   handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST,
-  handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS
+  handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS,
 };
