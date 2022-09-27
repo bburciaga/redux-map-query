@@ -14,7 +14,6 @@ import {
   BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
   BUFFERED_EXTENTS_NOTHING_TO_UPDATE,
   BUFFERED_EXTENTS_REMOVE_FURTHEST_FAIL,
-  BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST,
   BUFFERED_EXTENTS_REMOVE_FURTHEST_SUCCESS,
   BUFFERED_EXTENTS_UPDATE_FAIL,
   BUFFERED_EXTENTS_UPDATE_SUCCESS,
@@ -31,15 +30,20 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
   const bufferedExtents = yield select(selectBufferedExtents);
 
   try {
-    if (bufferedExtents.data.features.length > 0) {
+    // If the extents are initialized
+    if (bufferedExtents.initialized) {
+      // Grab closest extent
       const closestExtent: any = getClosestExtent(
         aGeo.properties.center,
         bufferedExtents.data.features
       );
+      // Needed in case user is in a diagonal direction in regards to the
+      // closest geometery
       const direction: string = getDirectionFromBound(
         aGeo.properties.center,
         closestExtent
       );
+      // Create Extent based on Center Lat Lng values and closest extent
       const newExtent: any = createExtent(
         closestExtent.properties.center,
         direction
@@ -53,7 +57,10 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
           count: bufferedExtents.count + 1,
         },
       });
-    } else {
+    } 
+    // In case the extents have not been initialized
+    else {
+      // Create Extent based on Center lat lng values
       const newExtent = createExtent(aGeo.properties.center);
       yield put({
         type: BUFFERED_EXTENTS_INITIALIZE_SUCCESS,
@@ -74,15 +81,17 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_NO_INTERSECTIONS(action: any) {
 
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
   const { aGeo, intersects } = action.payload;
+  const bufferedExtents = yield select(selectBufferedExtents);
 
   try {
-    const bufferedExtents = yield select(selectBufferedExtents);
-
+    // In case user starts to leave an extent
     if (difference(action.payload.aGeo, intersects[0])) {
+      // Grab closest extent
       const closestExtent = getClosestExtent(
         aGeo.properties.center,
         bufferedExtents.data.features
       );
+      // Create Extent based on Closest Extent
       const newExtent = getNextExtent(action.payload.aGeo, closestExtent);
 
       yield put({
@@ -94,6 +103,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
         },
       });
     } else {
+      // For logging purposes
       yield put({
         type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE
       });
@@ -108,6 +118,13 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
   }
 }
 
+/**
+ * Helper function used for TWO INTERSECTION function
+ * @param diffCenter center of difference for geometry
+ * @param multipoly multipolygon used for comparison
+ * @param closestExtent closest extent in regards to user
+ * @returns new extent created by specified direction
+ */
 function createExtentBasedOnDifference (diffCenter: {lat: number, lng: number}, multipoly: any, closestExtent: any) {
   // check north
   if (
@@ -139,6 +156,11 @@ function createExtentBasedOnDifference (diffCenter: {lat: number, lng: number}, 
   }
 }
 
+/**
+ * saga handler for when the user has two intersections and is 
+ * leaving the extents
+ * @param action 
+ */
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
   const { aGeo, intersects } = action.payload;
 
@@ -148,18 +170,22 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
     const intersectsMultiPoly: any = createMultiPolyFromIntersects(intersects);
 
     if (difference(aGeo, intersectsMultiPoly)) {
+      // Get closest geometry
       const closestExtent = getClosestExtent(
         aGeo.properties.center,
         intersects
       );
 
+      // Assign center property to multi poly
       intersectsMultiPoly.properties.center = {
         lat: center(intersectsMultiPoly).geometry.coordinates[1],
         lng: center(intersectsMultiPoly).geometry.coordinates[0],
       };
+
       // get difference for check
       const diff = difference(aGeo, intersectsMultiPoly);
 
+      // get center of difference
       const diffCenter: any = diff
         ? {
             lat: center(diff).geometry.coordinates[1],
@@ -167,6 +193,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
           }
         : null;
 
+      // get new extent based on center of difference
       const newExtent: any = createExtentBasedOnDifference(diffCenter, intersectsMultiPoly, closestExtent);
 
       yield put({
@@ -177,7 +204,9 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
           count: bufferedExtents.count + 1,
         },
       });
-    } else {
+    }
+    // for logging purposes
+    else {
       yield put({
         type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE
       });
@@ -192,12 +221,17 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
   }
 }
 
+/**
+ * saga handler in the case that the user is intersecting three geometries
+ * and is leaving the extents
+ * @param action 
+ */
 function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
   const { aGeo, intersects } = action.payload;
 
+  const bufferedExtents = yield select(selectBufferedExtents);
   try {
-    const bufferedExtents = yield select(selectBufferedExtents);
-
+    // Multi polygon for the intersecting extents in regards to the user
     const intersectsMultiPoly: any = createMultiPolyFromIntersects(intersects);
 
     if (difference(aGeo, intersectsMultiPoly)) {
@@ -208,7 +242,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
           feature.properties.center,
           [aGeo]
         );
-        if (feature.properties.direction) tempExtents.push(feature);
+        tempExtents.push(feature);
       });
 
       let adjacent: any;
@@ -237,7 +271,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
             direction[0] === "n" ? direction[1] : direction[0]
           );
         }
-        else {
+        if (adjacent.properties.direction.includes("s")) {
           return createExtent(
             adjacent.properties.center,
             direction[0] === "s" ? direction[1] : direction[0]
