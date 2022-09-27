@@ -3,7 +3,7 @@ import { put, select } from "redux-saga/effects";
 import {
   createExtent,
   createFeatureCollection,
-  createMultiPolyFromIntersects,
+  createMultiPoly,
   getClosestExtent,
   getDirectionFromBound,
   getDirectionFromCenter,
@@ -186,7 +186,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
   try {
     const bufferedExtents = yield select(selectBufferedExtents);
 
-    const intersectsMultiPoly: any = createMultiPolyFromIntersects(intersects);
+    const intersectsMultiPoly: any = createMultiPoly(intersects);
 
     if (difference(aGeo, intersectsMultiPoly)) {
       // Get closest geometry
@@ -268,11 +268,6 @@ function createCornerExtent(directionStrings: any[], extentsArr: any[]) {
     });
   };
 
-  /**
-   *
-   * @param direction string value (E.g. "ne")
-   * @returns new geojson extent
-   */
   const getCornerExtent = (direction: string) => {
     if (adjacent.properties.direction.includes("n")) {
       return createExtent(
@@ -317,7 +312,7 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_THREE_INTERSECTIONS(action: any) {
   const bufferedExtents = yield select(selectBufferedExtents);
   try {
     // Multi polygon for the intersecting extents in regards to the user
-    const intersectsMultiPoly: any = createMultiPolyFromIntersects(intersects);
+    const intersectsMultiPoly: any = createMultiPoly(intersects);
 
     if (difference(aGeo, intersectsMultiPoly)) {
       // check where each geo is

@@ -1,25 +1,29 @@
-import {
-  center,
-  difference,
-  distance,
-  multiPolygon,
-  polygon,
-} from "@turf/turf";
+import { center, distance, multiPolygon, polygon } from "@turf/turf";
 import L, { LatLngBounds } from "leaflet";
 
 const length = 0.745201235056549;
 const width = 1.135711669921875;
 
+/**
+ * Turns array of features into feature collection object
+ * @param features array of geojson objects
+ * @returns feature collection object
+ */
 function createFeatureCollection(features: any[]) {
   return {
     type: "FeatureCollection",
-    features: features
-  }
+    features: features,
+  };
 }
 
-function createMultiPolyFromIntersects(intersects: any[]) {
+/**
+ * Turns array of features into multi polygon
+ * @param features array of geojson object
+ * @returns multi polygon
+ */
+function createMultiPoly(features: any[]) {
   return multiPolygon(
-    intersects.map((feature: any) => {
+    features.map((feature: any) => {
       return feature.geometry.coordinates;
     })
   );
@@ -91,7 +95,16 @@ function createPolygonFromArray(
   return aGeo;
 }
 
-function getNewCenter(aCenter: { lat: number; lng: number }, direction: string) {
+/**
+ * Creates new center based on inputed center and direction
+ * @param aCenter center object as a reference for the new center
+ * @param direction
+ * @returns center object { lat: number, lng: number }
+ */
+function getNewCenter(
+  aCenter: { lat: number; lng: number },
+  direction: string
+) {
   switch (direction[0]) {
     case "n":
       return { lat: aCenter.lat + 2 * length, lng: aCenter.lng };
@@ -127,6 +140,12 @@ function createExtent(
   return createPolygonFromArray(tempBound, newCenter);
 }
 
+/**
+ * Gets next extent by comparing users location and the extents location
+ * @param userGeo used as refernce for next extent
+ * @param extentGeo used as reference for user geo
+ * @returns geojson object
+ */
 function getNextExtent(userGeo: any, extentGeo: any) {
   const tempArr = [];
   if (extentGeo.properties.northEast.lat < userGeo.properties.northEast.lat) {
@@ -155,6 +174,13 @@ function getNextExtent(userGeo: any, extentGeo: any) {
   return tempArr[0];
 }
 
+/**
+ * Checks the distance of all extents in regards to the users center location and
+ * finding the extent with the closest distance
+ * @param userCenter users geojson object used to compare with all extents
+ * @param extents all extents passed for comparison
+ * @returns geojson object of closest extent
+ */
 function getClosestExtent(
   userCenter: { lat: number; lng: number },
   extents: any[]
@@ -186,15 +212,18 @@ function getClosestExtent(
   return closestFeature;
 }
 
+/**
+ * Gets the direction of the specified center based on the center of
+ * the extents array
+ * @param aCenter specified lat lng object
+ * @param extents array of geojson objects
+ * @returns string direction (E.g. "ne")
+ */
 function getDirectionFromCenter(
   aCenter: { lat: number; lng: number },
   extents: any[]
 ) {
-  const multiPoly: any = multiPolygon(
-    extents.map((item: any) => {
-      return item.geometry.coordinates;
-    })
-  );
+  const multiPoly: any = createMultiPoly(extents);
   const tempCenter: any = center(multiPoly).geometry.coordinates;
   const mpCenter = { lat: tempCenter[1], lng: tempCenter[0] };
 
@@ -216,6 +245,13 @@ function getDirectionFromCenter(
   return direction;
 }
 
+/**
+ * Compares a center object with the NE property
+ * and the SE property of the geojson object
+ * @param aCenter specified lat lng object for comparison
+ * @param aGeo geojson object used to compare with the center object
+ * @returns string direction (E.g. "ne")
+ */
 function getDirectionFromBound(
   aCenter: { lat: number; lng: number },
   aGeo: any
@@ -241,6 +277,13 @@ function getDirectionFromBound(
   return direction;
 }
 
+/**
+ * Checks the distance of all extents in regards to the users center location and
+ * finding the extent with the furthest distance
+ * @param userCenter users geojson object used to compare with all extents
+ * @param extents all extents passed for comparison
+ * @returns geojson object of closest extent
+ */
 function removeFurthestExtent(
   aCenter: { lat: number; lng: number },
   extents: any[]
@@ -273,14 +316,18 @@ function removeFurthestExtent(
       timestamps.splice(index, 1);
     }
   }
-  return { updated_extents: tempExtents, update_cached: update_cached, timestamps: timestamps };
+  return {
+    updated_extents: tempExtents,
+    update_cached: update_cached,
+    timestamps: timestamps,
+  };
 }
 
 export {
   createUserGeo,
   createExtent,
   createFeatureCollection,
-  createMultiPolyFromIntersects,
+  createMultiPoly,
   getNextExtent,
   getClosestExtent,
   getDirectionFromBound,
