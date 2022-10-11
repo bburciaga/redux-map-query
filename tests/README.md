@@ -225,47 +225,97 @@ a5    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   - 
 
 ## Reduced Decision Tables
 
-`i`     i0      i0      i0    i0    i0    i0    i0    i0    i0    i0
+`i`     i0      i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0
+`be`    be1     be2   be2   be2   be2   be2   be2   be2   be2   be3   be3   be3   be3   be3   be3   be3   be3
+`d`     -       dn    de    ds    dw    dne   dse   dsw   dnw   dn    de    ds    dw    dne   dse   dsw   dnw
+`dif`   nDif    dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif
+=============================================================================================================
+a1      -       -       -   -     -     -     -     -     -     -     -     -     -     -     -     -     -
+a2      X       -       -   -     -     -     -     -     -     -     -     -     -     -     -     -     -
+a3-n    -       X       -   -     -     -     -     -     -     X     -     -     -     -     -     -     -
+a3-e    -       -       X   -     -     -     -     -     -     -     X     -     -     -     -     -     -
+a3-s    -       -       -   X     -     -     -     -     -     -     -     X     -     -     -     -     -
+a3-w    -       -       -   -     X     -     -     -     -     -     -     -     X     -     -     -     -
+a3-ne   -       -       -   -     -     X     -     -     -     -     -     -     -     X     -     -     -
+a3-se   -       -       -   -     -     -     X     -     -     -     -     -     -     -     X     -     -
+a3-sw   -       -       -   -     -     -     -     X     -     -     -     -     -     -     -     X     -
+a3-nw   -       -       -   -     -     -     -     -     X     -     -     -     -     -     -     -     X
+a4      -       -       -   -     -     -     -     -     -     X     X     X     X     X     X     X     X
+a5      X       X       X   X     X     X     X     X     X     X     X     X     X     X     X     X     X
 
-`be`    be1     be1     be2   be2   be2   be2   be3   be3   be3   be3
-
-`d`     -       -       dn    de    ds    dw    dn    de    ds    dw
-
-`dif`   dif     nDif    dif   dif   dif   dif   dif   dif   dif   dif
 
 
+`i`     i1    i1    i1    i1    i1    i1    i1    i1    i1    i1    i1    i1    i1    i1    i1    i1
+`be`    be2   be2   be2   be2   be2   be2   be2   be2   be3   be3   be3   be3   be3   be3   be3   be3
+`d`     dn    de    ds    dw    dne   dse   dsw   dnw   dn    de    ds    dw    dne   dse   dsw   dnw
+`dif`   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif
+=====================================================================================================
+a1      -     -     -     -     -     -     -     -     -     -     -     -     -     -     -     -
+a2      -     -     -     -     -     -     -     -     -     -     -     -     -     -     -     -
+a3-n    X     -     -     -     -     -     -     -     X     -     -     -     -     -     -     -
+a3-e    -     X     -     -     -     -     -     -     -     X     -     -     -     -     -     -
+a3-s    -     -     X     -     -     -     -     -     -     -     X     -     -     -     -     -
+a3-w    -     -     -     X     -     -     -     -     -     -     -     X     -     -     -     -
+a3-ne   -     -     -     -     X     -     -     -     -     -     -     -     X     -     -     -
+a3-se   -     -     -     -     -     X     -     -     -     -     -     -     -     X     -     -
+a3-sw   -     -     -     -     -     -     X     -     -     -     -     -     -     -     X     -
+a3-nw   -     -     -     -     -     -     -     X     -     -     -     -     -     -     -     X
+a4      -     -     -     -     -     -     -     -     X     X     X     X     X     X     X     X
+a5      X     X     X     X     X     X     X     X     X     X     X     X     X     X     X     X
 
-`i`     i1            i1    i1    i1    i1    i1    i1    i1    i1
 
-`be`    be2,be3       be2   be2   be2   be2   be3   be3   be3   be3
-
-`d`     -             dn    de    ds    dw    dn    de    ds    dw
-
-`dif`   nDif          dif   dif   dif   dif   dif   dif   dif   dif
-
-
-`i`     i2            i2    i2    i2    i2    i2    i2    i2    i2
-
-`be`    be2,be3       be2   be2   be2   be2   be3   be3   be3   be3
-
-`d`     -             dn    de    ds    dw    dn    de    ds    dw
-
-`dif`   nDif          dif   dif   dif   dif   dif   dif   dif   dif
+`i`     i2    i2    i2    i2    i2    i2    i2    i2
+`be`    be2   be2   be2   be2   be2   be2   be2   be2   be3   be3   be3   be3   be3   be3   be3   be3
+`d`     dn    de    ds    dw    dne   dse   dsw   dnw   dn    de    ds    dw    dne   dse   dsw   dnw
+`dif`   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif
+=====================================================================================================
+a1      -     -     -     -     -     -     -     -     -     -     -     -     -     -     -     -
+a2      -     -     -     -     -     -     -     -     -     -     -     -     -     -     -     -
+a3-n    X     -     -     -     -     -     -     -     X     -     -     -     -     -     -     -
+a3-e    -     X     -     -     -     -     -     -     -     X     -     -     -     -     -     -
+a3-s    -     -     X     -     -     -     -     -     -     -     X     -     -     -     -     -
+a3-w    -     -     -     X     -     -     -     -     -     -     -     X     -     -     -     -
+a3-ne   -     -     -     -     X     -     -     -     -     -     -     -     X     -     -     -
+a3-se   -     -     -     -     -     X     -     -     -     -     -     -     -     X     -     -
+a3-sw   -     -     -     -     -     -     X     -     -     -     -     -     -     -     X     -
+a3-nw   -     -     -     -     -     -     -     X     -     -     -     -     -     -     -     X
+a4      -     -     -     -     -     -     -     -     X     X     X     X     X     X     X     X
+a5      X     X     X     X     X     X     X     X     X     X     X     X     X     X     X     X
 
 
 `i`     i3    i3    i3    i3    i3    i3    i3    i3
-
 `be`    be2   be2   be2   be2   be3   be3   be3   be3
-
 `d`     dne   dse   dsw   dnw   dne   dse   dsw   dnw
-
 `dif`   dif   dif   dif   dif   dif   dif   dif   dif
+=====================================================
+a1      -     -     -     -     -     -     -     -
+a2      -     -     -     -     -     -     -     -
+a3-n    -     -     -     -     -     -     -     -
+a3-e    -     -     -     -     -     -     -     -
+a3-s    -     -     -     -     -     -     -     -
+a3-w    -     -     -     -     -     -     -     -
+a3-ne   X     -     -     -     X     -     -     -
+a3-se   -     X     -     -     -     X     -     -
+a3-sw   -     -     X     -     -     -     X     -
+a3-nw   -     -     -     X     -     -     -     X
+a4      -     -     -     -     X     X     X     X
+a5      X     X     X     X     X     X     X     X
 
 
-`i`     i4
-
-`be`    be2,be3
-
+`i`     i1, i2, i3, i4
+`be`    be2, be3
 `d`     -
-
 `dif`   nDif
+=================
+a1      X
+a2      -
+a3-n    -
+a3-e    -
+a3-s    -
+a3-w    -
+a3-ne   -
+a3-se   -
+a3-sw   -
+a3-nw   -
+a4      -
+a5      -
