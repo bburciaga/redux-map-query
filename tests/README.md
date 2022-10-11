@@ -17,7 +17,8 @@ user is able to see.
 intersecting with the user bounds
 
 `Direction (d)` Refers to the user bounds being outside
-the buffered extents in a specific direction
+the buffered extents in a specific direction from center
+of buffered extents
 > e.g. north, south east, west, ...etc
 
 `Difference (diff)` Refers to the user bounds having a 
@@ -179,6 +180,15 @@ be2   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   - 
 be3   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
 dif   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T
 nDif  T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F
+=======================================================================================
+a1    X   -   X   -   X   -   X   -   X   X   X   -   X   -   X   -   X   -   X   X
+a2    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+a3-n  -   X   -   X   -   X   -   X   -   -   -   -   -   -   -   -   -   -   -   -
+a3-e  -   -   -   -   -   -   -   -   -   -   -   X   -   X   -   X   -   X   -   -
+a3-s  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+a3-w  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+a4    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   -   -
+a5    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   -   -
 
 
 
@@ -198,3 +208,12 @@ be2   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   - 
 be3   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
 dif   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T
 nDif  T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F
+=======================================================================================
+a1    X   -   X   -   X   -   X   -   X   X   X   -   X   -   X   -   X   -   X   X
+a2    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+a3-n  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+a3-e  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
+a3-s  -   X   -   X   -   X   -   X   -   -   -   -   -   -   -   -   -   -   -   -
+a3-w  -   -   -   -   -   -   -   -   -   -   -   X   -   X   -   X   -   X   -   -
+a4    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   -   -
+a5    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   -   -
