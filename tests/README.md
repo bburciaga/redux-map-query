@@ -39,9 +39,13 @@ difference from the buffered extents
 `be2` 0 < be < 5
 `be3` be > 5
 `dn` direction is north
+`dne` direction is north east
 `de` direction is east
+`dse` direction is south east
 `ds` direction is south
+`dsw` direction is south west
 `dw` direction is west
+`dnw` direction is north west
 
 ## Actions
 
@@ -54,6 +58,7 @@ difference from the buffered extents
 `a4` remove furthest extent
 `a5` fetch data
 
+## Decision Tables
 
 ### be1 north and east tests
 z     F   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
@@ -217,3 +222,50 @@ a3-s  -   X   -   X   -   X   -   X   -   -   -   -   -   -   -   -   -   -   - 
 a3-w  -   -   -   -   -   -   -   -   -   -   -   X   -   X   -   X   -   X   -   -
 a4    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   -   -
 a5    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   -   -
+
+## Reduced Decision Tables
+
+`i`     i0      i0      i0    i0    i0    i0    i0    i0    i0    i0
+
+`be`    be1     be1     be2   be2   be2   be2   be3   be3   be3   be3
+
+`d`     -       -       dn    de    ds    dw    dn    de    ds    dw
+
+`dif`   dif     nDif    dif   dif   dif   dif   dif   dif   dif   dif
+
+
+
+`i`     i1            i1    i1    i1    i1    i1    i1    i1    i1
+
+`be`    be2,be3       be2   be2   be2   be2   be3   be3   be3   be3
+
+`d`     -             dn    de    ds    dw    dn    de    ds    dw
+
+`dif`   nDif          dif   dif   dif   dif   dif   dif   dif   dif
+
+
+`i`     i2            i2    i2    i2    i2    i2    i2    i2    i2
+
+`be`    be2,be3       be2   be2   be2   be2   be3   be3   be3   be3
+
+`d`     -             dn    de    ds    dw    dn    de    ds    dw
+
+`dif`   nDif          dif   dif   dif   dif   dif   dif   dif   dif
+
+
+`i`     i3    i3    i3    i3    i3    i3    i3    i3
+
+`be`    be2   be2   be2   be2   be3   be3   be3   be3
+
+`d`     dne   dse   dsw   dnw   dne   dse   dsw   dnw
+
+`dif`   dif   dif   dif   dif   dif   dif   dif   dif
+
+
+`i`     i4
+
+`be`    be2,be3
+
+`d`     -
+
+`dif`   nDif
