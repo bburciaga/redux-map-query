@@ -63,7 +63,7 @@ a5            Fetch data from new extent
 
 `z`         T         T         T         T         T         T         T         T
 `i`         i0,i1,i2  i0,i1,i2  i0,i1,i2  i0,i1,i2  i0,i1,i2  i0,i1,i2  i0,i1,i2  i0,i1,i2
-`be`        be0,be1   be0,be1   be0,be1   be0,be1   be2       be2       be2       be2
+`be`        be1       be1       be1       be1       be2       be2       be2       be2
 `d`         dn        de        ds        dw        dn        de        ds        dw
 `dif`       T         T         T         T         T         T         T         T
 ==========================================================================================
@@ -82,25 +82,25 @@ a4          -         -         -         -         X         X         X       
 a5          X         X         X         X         X         X         X         X
 
 
-`z`         T     T     T     T     T     T     T     T
-`i`         i0,i3 i0,i3 i0,i3 i0,i3 i0,i3 i0,i3 i0,i3 i0,i3
-`be`        be1   be1   be1   be1   be2   be2   be2   be2
-`d`         dne   dse   dsw   dnw   dne   dse   dsw   dnw
-`dif`       T     T     T     T     T     T     T     T  
-=================================================================
-IMPOSSIBLE  -     -     -     -     -     -     -     -
-a1          -     -     -     -     -     -     -     -
-a2          -     -     -     -     -     -     -     -
-a3-n        -     -     -     -     -     -     -     -
-a3-e        -     -     -     -     -     -     -     -
-a3-s        -     -     -     -     -     -     -     -
-a3-w        -     -     -     -     -     -     -     -
-a3-ne       X     -     -     -     X     -     -     -
-a3-se       -     X     -     -     -     X     -     -
-a3-sw       -     -     X     -     -     -     X     -
-a3-nw       -     -     -     X     -     -     -     X
-a4          -     -     -     -     X     X     X     X
-a5          X     X     X     X     X     X     X     X
+`z`         T         T         T         T         T         T         T         T
+`i`         i0,i2,i3  i0,i2,i3  i0,i2,i3  i0,i2,i3  i0,i2,i3  i0,i2,i3  i0,i2,i3  i0,i2,i3
+`be`        be1       be1       be1       be1       be2       be2       be2       be2
+`d`         dne       dse       dsw       dnw       dne       dse       dsw       dnw
+`dif`       T         T         T         T         T         T         T         T  
+==========================================================================================
+IMPOSSIBLE  -         -         -         -         -         -         -         -
+a1          -         -         -         -         -         -         -         -
+a2          -         -         -         -         -         -         -         -
+a3-n        -         -         -         -         -         -         -         -
+a3-e        -         -         -         -         -         -         -         -
+a3-s        -         -         -         -         -         -         -         -
+a3-w        -         -         -         -         -         -         -         -
+a3-ne       X         -         -         -         X         -         -         -
+a3-se       -         X         -         -         -         X         -         -
+a3-sw       -         -         X         -         -         -         X         -
+a3-nw       -         -         -         X         -         -         -         X
+a4          -         -         -         -         X         X         X         X
+a5          X         X         X         X         X         X         X         X
 
 
 `z`         T
@@ -147,27 +147,6 @@ a5          -
 
 
 `z`         T
-`i`         i2
-`be`        be2,be3
-`d`         dne,dse,dsw,dnw
-`dif`       T  
-===========================
-IMPOSSIBLE  X
-a1          -
-a2          -
-a3-n        -
-a3-e        -
-a3-s        -
-a3-w        -
-a3-ne       -
-a3-se       -
-a3-sw       -
-a3-nw       -
-a4          -
-a5          -
-
-
-`z`         T
 `i`         i3
 `be`        -
 `d`         dn,de,ds,dw
@@ -189,7 +168,7 @@ a5          -
 
 
 `z`         T
-`i`         i0,i1,i2,i3,i4
+`i`         -
 `be`        be0
 `d`         -
 `dif`       T  
