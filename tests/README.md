@@ -25,297 +25,166 @@ of buffered extents
 difference from the buffered extents
 > i.e. leaving the buffered extents
 
-## Cases
-
-`z` z > 9
-`diff` there is a difference
-`nDiff` there is no difference
-`i0` i = 0
-`i1` i = 1
-`i2` i = 2
-`i3` i = 3
-`i4` i = 4
-`be1` be = 0
-`be2` 0 < be < 5
-`be3` be > 5
-`dn` direction is north
-`dne` direction is north east
-`de` direction is east
-`dse` direction is south east
-`ds` direction is south
-`dsw` direction is south west
-`dw` direction is west
-`dnw` direction is north west
-
-## Actions
-
-`a1` do not create a new buffered extent
-`a2` create new extent at the center of the user bounds
-`a3-n` create new extent north of closest buffered extent
-`a3-e` create new extent east of closest buffered extent
-`a3-s` create new extent south of closest buffered extent
-`a3-w` create new extent west of closest buffered extent
-`a4` remove furthest extent
-`a5` fetch data
-
-## Decision Tables
-
-### be1 north and east tests
-z     F   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
-i0    -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -
-i1    -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -
-i2    -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -
-i3    -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -
-i4    -   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T
-dn    -   -   T   -   T   -   T   -   T   -   T   -   -   -   -   -   -   -   -   -   -
-de    -   -   -   -   -   -   -   -   -   -   -   -   T   -   T   -   T   -   T   -   T
-ds    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-dw    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-be1   -   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
-be2   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-be3   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-dif   -   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T
-nDif  -   -   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F
-=======================================================================================
-a1    X   -   X   X   X   X   X   X   X   X   X   X   X   X   X   X   X   X   X   X   X
-a2    -   X   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-n  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-e  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-s  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-w  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a4    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a5    -   X   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-
-
-### be1 south and west tests
-z     T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
-i0    T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -
-i1    -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -
-i2    -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -
-i3    -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -
-i4    -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T
-dn    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-de    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-ds    -   T   -   T   -   T   -   T   -   T   -   -   -   -   -   -   -   -   -   -
-dw        -   -   -   -   -   -   -   -   -   -   T   -   T   -   T   -   T   -   T
-be1   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
-be2   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-be3   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-dif   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T
-nDif  T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F
-=======================================================================================
-a1    X   X   X   X   X   X   X   X   X   X   X   X   X   X   X   X   X   X   X   X
-a2    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-n  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-e  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-s  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-w  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a4    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a5    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-
-
-### be2 north and east tests
-z     T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
-i0    T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -
-i1    -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -
-i2    -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -
-i3    -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -
-i4    -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T
-dn    -   T   -   T   -   T   -   T   -   T   -   -   -   -   -   -   -   -   -   -
-de    -   -   -   -   -   -   -   -   -   -   -   T   -   T   -   T   -   T   -   T
-ds    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-dw    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-be1   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   
-be2   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
-be3   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-dif   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T
-nDif  T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F
-=======================================================================================
-a1    X   -   X   -   X   -   X   -   X   X   X   -   X   -   X   -   X   -   X   X
-a2    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-n  -   X   -   X   -   X   -   X   -   -   -   -   -   -   -   -   -   -   -   -
-a3-e  -   -   -   -   -   -   -   -   -   -   -   X   -   X   -   X   -   X   -   -
-a3-s  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-w  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a4    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a5    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   -   -
-
-
-### be2 south and west tests
-z     T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
-i0    T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -
-i1    -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -
-i2    -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -
-i3    -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -
-i4    -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T
-dn    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-de    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-ds    -   T   -   T   -   T   -   T   -   T   -   -   -   -   -   -   -   -   -   -
-dw    -   -   -   -   -   -   -   -   -   -   -   T   -   T   -   T   -   T   -   T
-be1   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   
-be2   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
-be3   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-dif   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T
-nDif  T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F
-=======================================================================================
-a1    X   -   X   -   X   -   X   -   X   X   X   -   X   -   X   -   X   -   X   X
-a2    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-n  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-e  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-s  -   X   -   X   -   X   -   X   -   -   -   -   -   -   -   -   -   -   -   -
-a3-w  -   -   -   -   -   -   -   -   -   -   -   X   -   X   -   X   -   X   -   -
-a4    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a5    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   -   -
-
-
-
-### be3 north and east tests
-z     T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
-i0    T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -
-i1    -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -
-i2    -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -
-i3    -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -
-i4    -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T
-dn    -   T   -   T   -   T   -   T   -   T   -   -   -   -   -   -   -   -   -   -
-de    -   -   -   -   -   -   -   -   -   -   -   T   -   T   -   T   -   T   -   T
-ds    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-dw    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-be1   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-be2   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-be3   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
-dif   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T
-nDif  T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F
-=======================================================================================
-a1    X   -   X   -   X   -   X   -   X   X   X   -   X   -   X   -   X   -   X   X
-a2    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-n  -   X   -   X   -   X   -   X   -   -   -   -   -   -   -   -   -   -   -   -
-a3-e  -   -   -   -   -   -   -   -   -   -   -   X   -   X   -   X   -   X   -   -
-a3-s  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-w  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a4    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   -   -
-a5    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   -   -
-
-
-
-### be3 south and west tests
-z     T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
-i0    T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -
-i1    -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -
-i2    -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -   -   -
-i3    -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T   -   -
-i4    -   -   -   -   -   -   -   -   T   T   -   -   -   -   -   -   -   -   T   T
-dn    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-de    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-ds    -   T   -   T   -   T   -   T   -   T   -   -   -   -   -   -   -   -   -   -
-dw    -   -   -   -   -   -   -   -   -   -   -   T   -   T   -   T   -   T   -   T
-be1   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-be2   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-be3   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T   T
-dif   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T
-nDif  T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F   T   F
-=======================================================================================
-a1    X   -   X   -   X   -   X   -   X   X   X   -   X   -   X   -   X   -   X   X
-a2    -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-n  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-e  -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
-a3-s  -   X   -   X   -   X   -   X   -   -   -   -   -   -   -   -   -   -   -   -
-a3-w  -   -   -   -   -   -   -   -   -   -   -   X   -   X   -   X   -   X   -   -
-a4    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   -   -
-a5    -   X   -   X   -   X   -   X   -   -   -   X   -   X   -   X   -   X   -   -
-
 ## Reduced Decision Tables
 
-`i`     i0      i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0
-`be`    be1     be2   be2   be2   be2   be2   be2   be2   be2   be3   be3   be3   be3   be3   be3   be3   be3
-`d`     -       dn    de    ds    dw    dne   dse   dsw   dnw   dn    de    ds    dw    dne   dse   dsw   dnw
-`dif`   nDif    dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif
-=============================================================================================================
-a1      -       -       -   -     -     -     -     -     -     -     -     -     -     -     -     -     -
-a2      X       -       -   -     -     -     -     -     -     -     -     -     -     -     -     -     -
-a3-n    -       X       -   -     -     -     -     -     -     X     -     -     -     -     -     -     -
-a3-e    -       -       X   -     -     -     -     -     -     -     X     -     -     -     -     -     -
-a3-s    -       -       -   X     -     -     -     -     -     -     -     X     -     -     -     -     -
-a3-w    -       -       -   -     X     -     -     -     -     -     -     -     X     -     -     -     -
-a3-ne   -       -       -   -     -     X     -     -     -     -     -     -     -     X     -     -     -
-a3-se   -       -       -   -     -     -     X     -     -     -     -     -     -     -     X     -     -
-a3-sw   -       -       -   -     -     -     -     X     -     -     -     -     -     -     -     X     -
-a3-nw   -       -       -   -     -     -     -     -     X     -     -     -     -     -     -     -     X
-a4      -       -       -   -     -     -     -     -     -     X     X     X     X     X     X     X     X
-a5      X       X       X   X     X     X     X     X     X     X     X     X     X     X     X     X     X
+### Cases
+`z`   zoom level is within rendering bounds (T or F)
+`be0` be = 0
+`be1` 1 <= be <=4
+`be2` be = 5
+`dn`  dif is north of buffered extents
+`de`  dif is east of buffered extents
+`ds`  dif is south of buffered extents
+`dw`  dif is west of buffered extents
+`dne` dif is north east of buffered extents
+`dse` dif is south east of buffered extents
+`dsw` dif is south west of buffered extents
+`dnw` dif is north west of buffered extents
+`dif` there is a difference between user bounds and buffered extents (T or F)
+
+`z`         T       T     T     T     T     T     T     T     T     T     T     T     T     T     T     T     T
+`i`         i0      i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0    i0
+`be`        be0     be1   be1   be1   be1   be1   be1   be1   be1   be2   be2   be2   be2   be2   be2   be2   be2
+`d`         -       dn    de    ds    dw    dne   dse   dsw   dnw   dn    de    ds    dw    dne   dse   dsw   dnw
+`dif`       F       T     T     T     T     T     T     T     T     T     T     T     T     T     T     T     T  
+=================================================================================================================
+IMPOSSIBLE
+a1          -       -       -   -     -     -     -     -     -     -     -     -     -     -     -     -     -
+a2          X       -       -   -     -     -     -     -     -     -     -     -     -     -     -     -     -
+a3-n        -       X       -   -     -     -     -     -     -     X     -     -     -     -     -     -     -
+a3-e        -       -       X   -     -     -     -     -     -     -     X     -     -     -     -     -     -
+a3-s        -       -       -   X     -     -     -     -     -     -     -     X     -     -     -     -     -
+a3-w        -       -       -   -     X     -     -     -     -     -     -     -     X     -     -     -     -
+a3-ne       -       -       -   -     -     X     -     -     -     -     -     -     -     X     -     -     -
+a3-se       -       -       -   -     -     -     X     -     -     -     -     -     -     -     X     -     -
+a3-sw       -       -       -   -     -     -     -     X     -     -     -     -     -     -     -     X     -
+a3-nw       -       -       -   -     -     -     -     -     X     -     -     -     -     -     -     -     X
+a4          -       -       -   -     -     -     -     -     -     X     X     X     X     X     X     X     X
+a5          X       X       X   X     X     X     X     X     X     X     X     X     X     X     X     X     X
 
 
 
-`i`     i1    i1    i1    i1    i1    i1    i1    i1    i1    i1    i1    i1    i1    i1    i1    i1
-`be`    be2   be2   be2   be2   be2   be2   be2   be2   be3   be3   be3   be3   be3   be3   be3   be3
-`d`     dn    de    ds    dw    dne   dse   dsw   dnw   dn    de    ds    dw    dne   dse   dsw   dnw
-`dif`   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif
-=====================================================================================================
-a1      -     -     -     -     -     -     -     -     -     -     -     -     -     -     -     -
-a2      -     -     -     -     -     -     -     -     -     -     -     -     -     -     -     -
-a3-n    X     -     -     -     -     -     -     -     X     -     -     -     -     -     -     -
-a3-e    -     X     -     -     -     -     -     -     -     X     -     -     -     -     -     -
-a3-s    -     -     X     -     -     -     -     -     -     -     X     -     -     -     -     -
-a3-w    -     -     -     X     -     -     -     -     -     -     -     X     -     -     -     -
-a3-ne   -     -     -     -     X     -     -     -     -     -     -     -     X     -     -     -
-a3-se   -     -     -     -     -     X     -     -     -     -     -     -     -     X     -     -
-a3-sw   -     -     -     -     -     -     X     -     -     -     -     -     -     -     X     -
-a3-nw   -     -     -     -     -     -     -     X     -     -     -     -     -     -     -     X
-a4      -     -     -     -     -     -     -     -     X     X     X     X     X     X     X     X
-a5      X     X     X     X     X     X     X     X     X     X     X     X     X     X     X     X
+`z`         T     T     T     T     T     T     T     T     T
+`i`         i1    i1    i1    i1    i1    i1    i1    i1    i1
+`be`        be2   be2   be2   be2   be3   be3   be3   be3   be2,be3
+`d`         dn    de    ds    dw    dn    de    ds    dw    dne,dse,dsw,dnw
+`dif`       T     T     T     T     T     T     T     T     T  
+===========================================================================
+IMPOSSIBLE  -     -     -     -     -     -     -     -     X
+a1          -     -     -     -     -     -     -     -     -
+a2          -     -     -     -     -     -     -     -     -
+a3-n        X     -     -     -     X     -     -     -     -
+a3-e        -     X     -     -     -     X     -     -     -
+a3-s        -     -     X     -     -     -     X     -     -
+a3-w        -     -     -     X     -     -     -     X     -
+a3-ne       -     -     -     -     -     -     -     -     -
+a3-se       -     -     -     -     -     -     -     -     -
+a3-sw       -     -     -     -     -     -     -     -     -
+a3-nw       -     -     -     -     -     -     -     -     -
+a4          -     -     -     -     X     X     X     X     -
+a5          X     X     X     X     X     X     X     X     -
 
 
-`i`     i2    i2    i2    i2    i2    i2    i2    i2
-`be`    be2   be2   be2   be2   be2   be2   be2   be2   be3   be3   be3   be3   be3   be3   be3   be3
-`d`     dn    de    ds    dw    dne   dse   dsw   dnw   dn    de    ds    dw    dne   dse   dsw   dnw
-`dif`   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif   dif
-=====================================================================================================
-a1      -     -     -     -     -     -     -     -     -     -     -     -     -     -     -     -
-a2      -     -     -     -     -     -     -     -     -     -     -     -     -     -     -     -
-a3-n    X     -     -     -     -     -     -     -     X     -     -     -     -     -     -     -
-a3-e    -     X     -     -     -     -     -     -     -     X     -     -     -     -     -     -
-a3-s    -     -     X     -     -     -     -     -     -     -     X     -     -     -     -     -
-a3-w    -     -     -     X     -     -     -     -     -     -     -     X     -     -     -     -
-a3-ne   -     -     -     -     X     -     -     -     -     -     -     -     X     -     -     -
-a3-se   -     -     -     -     -     X     -     -     -     -     -     -     -     X     -     -
-a3-sw   -     -     -     -     -     -     X     -     -     -     -     -     -     -     X     -
-a3-nw   -     -     -     -     -     -     -     X     -     -     -     -     -     -     -     X
-a4      -     -     -     -     -     -     -     -     X     X     X     X     X     X     X     X
-a5      X     X     X     X     X     X     X     X     X     X     X     X     X     X     X     X
+`z`         T     T     T     T     T     T     T     T     T
+`i`         i2    i2    i2    i2    i2    i2    i2    i2    i2
+`be`        be2   be2   be2   be2   be3   be3   be3   be3   be2,be3
+`d`         dn    de    ds    dw    dn    de    ds    dw    dne,dse,dsw,dnw
+`dif`       T     T     T     T     T     T     T     T     T  
+===========================================================================
+IMPOSSIBLE  -     -     -     -     X     X     X     X     X
+a1          -     -     -     -     -     -     -     -     -
+a2          -     -     -     -     -     -     -     -     -
+a3-n        X     -     -     -     X     -     -     -     -
+a3-e        -     X     -     -     -     X     -     -     -
+a3-s        -     -     X     -     -     -     X     -     -
+a3-w        -     -     -     X     -     -     -     X     -
+a3-ne       -     -     -     -     -     -     -     -     -
+a3-se       -     -     -     -     -     -     -     -     -
+a3-sw       -     -     -     -     -     -     -     -     -
+a3-nw       -     -     -     -     -     -     -     -     -
+a4          -     -     -     -     X     X     X     X     -
+a5          X     X     X     X     X     X     X     X     -
 
 
-`i`     i3    i3    i3    i3    i3    i3    i3    i3
-`be`    be2   be2   be2   be2   be3   be3   be3   be3
-`d`     dne   dse   dsw   dnw   dne   dse   dsw   dnw
-`dif`   dif   dif   dif   dif   dif   dif   dif   dif
-=====================================================
-a1      -     -     -     -     -     -     -     -
-a2      -     -     -     -     -     -     -     -
-a3-n    -     -     -     -     -     -     -     -
-a3-e    -     -     -     -     -     -     -     -
-a3-s    -     -     -     -     -     -     -     -
-a3-w    -     -     -     -     -     -     -     -
-a3-ne   X     -     -     -     X     -     -     -
-a3-se   -     X     -     -     -     X     -     -
-a3-sw   -     -     X     -     -     -     X     -
-a3-nw   -     -     -     X     -     -     -     X
-a4      -     -     -     -     X     X     X     X
-a5      X     X     X     X     X     X     X     X
+`z`         T             T     T     T     T     T     T     T     T     T
+`i`         i3            i3    i3    i3    i3    i3    i3    i3    i3    i3
+`be`        -             -     be2   be2   be2   be2   be3   be3   be3   be3
+`d`         dn,de,ds,dw   -     dne   dse   dsw   dnw   dne   dse   dsw   dnw
+`dif`       T             F     T     T     T     T     T     T     T     T  
+========================================================================
+IMPOSSIBLE  X             X     -     -     -     -     -     -     -     -
+a1          -             -     -     -     -     -     -     -     -     -
+a2          -             -     -     -     -     -     -     -     -     -
+a3-n        -             -     -     -     -     -     -     -     -     -
+a3-e        -             -     -     -     -     -     -     -     -     -
+a3-s        -             -     -     -     -     -     -     -     -     -
+a3-w        -             -     -     -     -     -     -     -     -     -
+a3-ne       -             -     X     -     -     -     X     -     -     -
+a3-se       -             -     -     X     -     -     -     X     -     -
+a3-sw       -             -     -     -     X     -     -     -     X     -
+a3-nw       -             -     -     -     -     X     -     -     -     X
+a4          -             -     -     -     -     -     X     X     X     X
+a5          -             -     X     X     X     X     X     X     X     X
 
 
-`i`     i1, i2, i3, i4
-`be`    be2, be3
-`d`     -
-`dif`   nDif
-=================
-a1      X
-a2      -
-a3-n    -
-a3-e    -
-a3-s    -
-a3-w    -
-a3-ne   -
-a3-se   -
-a3-sw   -
-a3-nw   -
-a4      -
-a5      -
+`z`         T
+`i`         i0,i1,i2,i3,i4
+`be`        be0
+`d`         -
+`dif`       T  
+==========================
+IMPOSSIBLE  X
+a1          -
+a2          -
+a3-n        -
+a3-e        -
+a3-s        -
+a3-w        -
+a3-ne       -
+a3-se       -
+a3-sw       -
+a3-nw       -
+a4          -
+a5          -
+
+
+`z`         T
+`i`         i1,i2,i4
+`be`        be1,be2
+`d`         -
+`dif`       F
+====================
+IMPOSSIBLE  -
+a1          X
+a2          -
+a3-n        -
+a3-e        -
+a3-s        -
+a3-w        -
+a3-ne       -
+a3-se       -
+a3-sw       -
+a3-nw       -
+a4          -
+a5          -
+
+
+`z`         F
+`i`         -
+`be`        -
+`d`         -
+`dif`       -
+==================
+IMPOSSIBLE  -
+a1          X
+a2          -
+a3-n        -
+a3-e        -
+a3-s        -
+a3-w        -
+a3-ne       -
+a3-se       -
+a3-sw       -
+a3-nw       -
+a4          -
+a5          -
