@@ -3,7 +3,14 @@
   text-align: center;
 }
 
-#map {
+#proof-map {
+  height: 650px;
+  width: 50%;
+  border-radius: 10px;
+  margin: 5px;
+}
+
+#main-map {
   height: 650px;
   width: 50%;
   border-radius: 10px;

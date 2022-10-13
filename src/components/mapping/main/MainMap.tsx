@@ -5,7 +5,7 @@ export const MainMap = () => {
   return (
     <>
       <MapContainer
-        id="map"
+        id="main-map"
         center={[55, -122]}
         zoom={5}
         scrollWheelZoom={true}
