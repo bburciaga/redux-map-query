@@ -14,7 +14,8 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands'
+import "./commands/commands";
+import "./commands/map";
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

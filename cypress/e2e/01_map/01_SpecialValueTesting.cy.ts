@@ -1,29 +1,52 @@
-describe("Zoom on Map", () => {
-  it("Can zoom in once", () => {
-    cy.get("#main-map").dblclick("center");
-  });
-});
+import { bufferedExtentsTestCase } from "../../support/commands/map";
 
-describe("Move on Map", () => {
-  it("Can be moved north", () => {
-    cy.get("#main-map").type("{shift+upArrow}");
-  });
-});
+// describe("Zoom on Map", () => {
+//   it("Can zoom in once", () => {
+//     cy.get("#main-map").dblclick("center");
+//   });
+// });
+
+// describe("Move on Map", () => {
+//   it("Can be moved north", () => {
+//     cy.get("#main-map").type("{shift+upArrow}");
+//   });
+// });
 
 //  z1:   Zoom level < 9
 //  z2:   Zoom level >= 9
 //  B0:   extents = 0
 //  B1:   1 <= extents < 5
 //  B2:   extents = 5
-//  Mn:   Move out of bounds north
-//  Ms:   Move out of bounds south
-//  Me:   Move out of bounds east
-//  Mw:   Move out of bounds west
+//  M1:   Move out of bounds north
+//  M2:   Move out of bounds south
+//  M3:   Move out of bounds east
+//  M4:   Move out of bounds west
 describe("Special Value Testing", () => {
+  // const bufferedExtents = useSelector(selectBufferedExtents);
+
+  it("Goes to webpage", () => {
+    // cy.log("=================", bufferedExtents);
+    cy.visit("http://localhost:3000");
+    cy.wait(500);
+  });
+
+  it("has expected state on load", () => {
+    cy.window()
+      .its("store")
+      .invoke("getState")
+      .its("bufferedExtents")
+      .its("data")
+      .its("features")
+      .should("have.length", 0);
+  });
   //  Case 1    z1    B0    Mn
+  // keypressMoveMap("{upArrow}", 3);
   //  Case 2    z1    B0    Ms
+  // keypressMoveMap("{downArrow}", 3);
   //  Case 3    z1    B0    Me
+  // keypressMoveMap("{leftArrow}", 3);
   //  Case 4    z1    B0    Mw
+  // keypressMoveMap("{rightArrow}", 3);
   //  --------------------------
   //  Case 5    z1    B1    Mn
   //  Case 6    z1    B1    Ms

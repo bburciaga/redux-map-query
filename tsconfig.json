@@ -1,5 +1,5 @@
 {
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "_cypress"],
   "compilerOptions": {
     "strict": false,
     "esModuleInterop": true,
