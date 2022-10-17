@@ -22,7 +22,7 @@ export const Renders = () => {
   countRef.current++;
 
   useMapEvent("zoomend", (_e) => {
-    if (map.getZoom() > 8) {
+    if (map.getZoom() > 9) {
       /* User Bound Actions */
       const tempBounds = map.getBounds();
       const userGeo = createUserGeo(tempBounds);
@@ -64,10 +64,16 @@ export const Renders = () => {
   });
 
   return (
-    <>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "flex-end",
+        alignContent: "flex-start",
+      }}
+    >
       <BufferedExtents />
       <CachedData />
       <InfoBox count={countRef.current} />
-    </>
+    </div>
   );
 };

@@ -1,4 +1,4 @@
-import { bufferedExtentsTestCase } from "../../support/commands/map";
+import { bufferedExtentsTestCase, zoomIn } from "../../support/commands/map";
 
 // describe("Zoom on Map", () => {
 //   it("Can zoom in once", () => {
@@ -12,8 +12,8 @@ import { bufferedExtentsTestCase } from "../../support/commands/map";
 //   });
 // });
 
-//  z1:   Zoom level < 9
-//  z2:   Zoom level >= 9
+//  z0:   Zoom level < 9
+//  z1:   Zoom level >= 9
 //  B0:   extents = 0
 //  B1:   1 <= extents < 5
 //  B2:   extents = 5
@@ -39,24 +39,28 @@ describe("Special Value Testing", () => {
       .its("features")
       .should("have.length", 0);
   });
-  //  Case 1    z1    B0    Mn
+
+  it("Can zoom into map with button", () => {
+    zoomIn();
+  });
+  //  Case 1    z0    B0    Mn
   // keypressMoveMap("{upArrow}", 3);
-  //  Case 2    z1    B0    Ms
+  //  Case 2    z0    B0    Ms
   // keypressMoveMap("{downArrow}", 3);
-  //  Case 3    z1    B0    Me
+  //  Case 3    z0    B0    Me
   // keypressMoveMap("{leftArrow}", 3);
-  //  Case 4    z1    B0    Mw
+  //  Case 4    z0    B0    Mw
   // keypressMoveMap("{rightArrow}", 3);
   //  --------------------------
-  //  Case 5    z1    B1    Mn
-  //  Case 6    z1    B1    Ms
-  //  Case 7    z1    B1    Me
-  //  Case 8    z1    B1    Mw
+  //  Case 5    z0    B1    Mn
+  //  Case 6    z0    B1    Ms
+  //  Case 7    z0    B1    Me
+  //  Case 8    z0    B1    Mw
   //  --------------------------
-  //  Case 9    z1    B2    Mn
-  //  Case 10    z1    B2    Ms
-  //  Case 11    z1    B2    Me
-  //  Case 12    z1    B2    Mw
+  //  Case 9    z0    B2    Mn
+  //  Case 10    z0    B2    Ms
+  //  Case 11    z0    B2    Me
+  //  Case 12    z0    B2    Mw
   //  --------------------------
   //  Case 13    z2    B0    Mn
   //  Case 14    z2    B0    Ms
