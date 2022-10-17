@@ -1,22 +1,22 @@
 import { useSelector } from "react-redux";
-import { selectUserBound } from "../../../state/reducers/userBound";
 import { GeoJSON } from "react-leaflet";
 import React from "react";
 import InfoBox from "./InfoBox";
 import BufferedExtents from "../BufferedExtents";
 import CachedData from "../CachedData";
+import { selectUserSettings } from "../../../state/reducers/userSettings";
 
 export const Renders = () => {
-  const userBound = useSelector(selectUserBound);
+  const userSettings = useSelector(selectUserSettings);
 
   const countRef = React.useRef(0);
   countRef.current++;
 
   return (
     <>
-      {userBound.initialized && (
+      {userSettings.initialized && userSettings.zoom_level > 9 && (
         <GeoJSON
-          data={userBound.data}
+          data={userSettings.user_bounds}
           key={Math.random()}
           style={{ color: "red" }}
         />

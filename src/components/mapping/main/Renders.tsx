@@ -8,10 +8,10 @@ import {
   USER_BOUND_UPDATE_ON_MOVE,
   USER_BOUND_UPDATE_ON_ZOOM,
   USER_SETTINGS_INITIALIZE,
+  USER_SETTINGS_MOVE_UPDATE_REQUEST,
   USER_SETTINGS_ZOOM_LEVEL_UPDATE_FAIL,
   USER_SETTINGS_ZOOM_LEVEL_UPDATE_REQUEST,
 } from "../../../state/actions";
-import { selectUserBound } from "../../../state/reducers/userBound";
 import { selectUserSettings } from "../../../state/reducers/userSettings";
 import BufferedExtents from "../BufferedExtents";
 import CachedData from "../CachedData";
@@ -20,7 +20,6 @@ import InfoBox from "./InfoBox";
 export const Renders = () => {
   const dispatch = useDispatch();
   const map = useMap();
-  const userBound = useSelector(selectUserBound);
   const userSettings = useSelector(selectUserSettings);
 
   const countRef = React.useRef(0);
@@ -33,6 +32,7 @@ export const Renders = () => {
           type: USER_SETTINGS_INITIALIZE,
           payload: {
             zoom_level: map.getZoom(),
+            user_bounds: createUserGeo(map.getBounds()),
           },
         });
       } catch (error: any) {
@@ -47,50 +47,29 @@ export const Renders = () => {
   }, [userSettings.initialized]);
 
   useMapEvent("zoomend", (_e) => {
+    /* User Bound Actions */
+    const tempBounds = map.getBounds();
+    const userGeo = createUserGeo(tempBounds);
+
     dispatch({
       type: USER_SETTINGS_ZOOM_LEVEL_UPDATE_REQUEST,
       payload: {
         zoom_level: map.getZoom(),
+        user_bounds: userGeo,
       },
     });
-    if (map.getZoom() > 9) {
-      /* User Bound Actions */
-      const tempBounds = map.getBounds();
-      const userGeo = createUserGeo(tempBounds);
-
-      if (!userBound.initialized) {
-        dispatch({
-          type: USER_BOUND_INITIALIZE,
-          payload: {
-            feature: userGeo,
-            count: userBound.count + 1,
-          },
-        });
-      } else {
-        dispatch({
-          type: USER_BOUND_UPDATE_ON_ZOOM,
-          payload: {
-            feature: userGeo,
-            count: userBound.count + 1,
-          },
-        });
-      }
-    }
   });
 
   useMapEvent("moveend", (_e) => {
     if (map.getZoom() > 8) {
       const userGeo = createUserGeo(map.getBounds());
       /* User Bound */
-      if (userBound.initialized) {
-        dispatch({
-          type: USER_BOUND_UPDATE_ON_MOVE,
-          payload: {
-            feature: userGeo,
-            count: userBound.count + 1,
-          },
-        });
-      }
+      dispatch({
+        type: USER_SETTINGS_MOVE_UPDATE_REQUEST,
+        payload: {
+          user_bounds: userGeo,
+        },
+      });
     }
   });
 
