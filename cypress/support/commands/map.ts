@@ -1,10 +1,12 @@
 /// <reference types="cypress" />
 
+import { b0, b1, b2 } from "./cases/bufferedExtents";
+import { z0, z1 } from "./cases/zoom";
+
 declare global {
   namespace Cypress {
     interface Chainable {
       bufferedExtentsTestCase: typeof bufferedExtentsTestCase;
-      zoomIn: typeof zoomIn;
     }
   }
 }
@@ -23,20 +25,7 @@ export const bufferedExtentsTestCase = (
   bCase: number,
   zCase: number
 ) => {
-  let boundsToTest: string = "";
   let key: string = "";
-
-  switch (bCase) {
-    case 0:
-      boundsToTest = "extents = 0";
-      break;
-    case 1:
-      boundsToTest = "1 <= extents <= 4";
-      break;
-    case 3:
-      boundsToTest = "extents = 5";
-      break;
-  }
 
   switch (mCase) {
     case 1:
@@ -54,29 +43,20 @@ export const bufferedExtentsTestCase = (
   }
 
   describe("Move map with keypress", () => {
-    it("should " + !zCase && "not" + " be within zoom bounds", () => {
-      // add userSettings map zoom level
-    });
+    if (zCase) z1();
+    else z0();
 
-    it("should have " + boundsToTest, () => {
-      if (bCase === 1) {
-        cy.window()
-          .its("store")
-          .invoke("getState")
-          .its("bufferedExtents")
-          .its("data")
-          .its("features")
-          .should("have.length.within", 1, 4);
-      } else {
-        cy.window()
-          .its("store")
-          .invoke("getState")
-          .its("bufferedExtents")
-          .its("data")
-          .its("features")
-          .should("have.length", bCase === 0 ? 0 : 5);
-      }
-    });
+    switch (bCase) {
+      case 0:
+        b0();
+        break;
+      case 1:
+        b1();
+        break;
+      case 2:
+        b2();
+        break;
+    }
 
     it("Can move the bounds", () => {
       // for (let i: number = 0; i < m; i++) {
@@ -85,12 +65,4 @@ export const bufferedExtentsTestCase = (
       // }
     });
   });
-};
-
-export const zoomIn = () => {
-  for (let i = 0; i < 5; i++) {
-    cy.wait(250);
-    cy.get(".leaflet-control-zoom-in").click();
-    cy.wait(250);
-  }
 };

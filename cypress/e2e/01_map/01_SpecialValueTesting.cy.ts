@@ -1,4 +1,5 @@
-import { bufferedExtentsTestCase, zoomIn } from "../../support/commands/map";
+import { z0, z1, zoomIn } from "../../support/commands/cases/zoom";
+import { bufferedExtentsTestCase } from "../../support/commands/map";
 
 // describe("Zoom on Map", () => {
 //   it("Can zoom in once", () => {
@@ -40,9 +41,14 @@ describe("Special Value Testing", () => {
       .should("have.length", 0);
   });
 
+  z0();
+
   it("Can zoom into map with button", () => {
     zoomIn();
   });
+
+  z1();
+
   //  Case 1    z0    B0    Mn
   // keypressMoveMap("{upArrow}", 3);
   //  Case 2    z0    B0    Ms
