@@ -1,5 +1,8 @@
+import { b1 } from "../../support/commands/cases/bufferedExtents";
 import { z0, z1, zoomIn } from "../../support/commands/cases/zoom";
 import { bufferedExtentsTestCase } from "../../support/commands/map";
+import { getClosestExtent} from "../../../src/helpers/geometry";
+import { difference } from "@turf/turf";
 
 // describe("Zoom on Map", () => {
 //   it("Can zoom in once", () => {
@@ -48,6 +51,46 @@ describe("Special Value Testing", () => {
   });
 
   z1();
+
+  b1();
+
+  it("should get values", () => {
+    let bufferedExtents: any[] = [];
+    let userBounds: any;
+    let dif: any;
+    cy.window()
+      .its("store")
+      .invoke("getState")
+      .its("bufferedExtents")
+      .its("data")
+      .its("features")
+      .then((val: any) => {
+        cy.log(val);
+        console.log("cypress extents", val);
+        bufferedExtents = val;
+      });
+    
+    cy.window()
+      .its("store")
+      .invoke("getState")
+      .its("userSettings")
+      .its("user_bounds")
+      .then((val: any) => {
+        cy.log(val);
+        console.log("cypress user", val);
+        userBounds = val;
+      });
+
+    if (bufferedExtents.length > 0) {
+      const closestExtent = getClosestExtent(userBounds.properties.center, bufferedExtents);
+      cy.log(closestExtent);
+      console.log("cypress closest", closestExtent);
+      dif = difference(userBounds, closestExtent);
+    }
+    
+    cy.wrap(dif)
+      .should("be.undefined");
+  });
 
   //  Case 1    z0    B0    Mn
   // keypressMoveMap("{upArrow}", 3);

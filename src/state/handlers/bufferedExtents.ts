@@ -121,6 +121,9 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_ONE_INTERSECTION(action: any) {
       // For logging purposes
       yield put({
         type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE,
+        payload: {
+          fetch_geo: null
+        }
       });
     }
   } catch (error: any) {
@@ -235,6 +238,9 @@ function* handle_BUFFERED_EXTENTS_UPDATE_ON_TWO_INTERSECTIONS(action: any) {
     else {
       yield put({
         type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE,
+        payload: {
+          fetch_geo: null
+        }
       });
     }
   } catch (error) {
@@ -434,6 +440,9 @@ function* handle_BUFFERED_EXTENTS_REMOVE_FURTHEST_REQUEST(action: any) {
     } else {
       yield put({
         type: BUFFERED_EXTENTS_NOTHING_TO_UPDATE,
+        payload: {
+          fetch_geo: null
+        }
       });
     }
   } catch (error: any) {

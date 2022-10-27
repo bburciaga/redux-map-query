@@ -14,16 +14,18 @@ declare global {
 // b0   extents = 0
 // b1   1 <= extents < 5
 // b3   extents = 5
-// m0   move north
-// m1   move south
-// m2   move east
-// m3   move west
+// m1   move north
+// m2   move south
+// m3   move east
+// m4   move west
 // z0   false
 // z1   true
+// d0   false
+// d1   true
 export const bufferedExtentsTestCase = (
   mCase: number,
   bCase: number,
-  zCase: number
+  zCase: boolean
 ) => {
   let key: string = "";
 
@@ -59,10 +61,10 @@ export const bufferedExtentsTestCase = (
     }
 
     it("Can move the bounds", () => {
-      // for (let i: number = 0; i < m; i++) {
-      //   cy.get("#main-map").type("{shift}" + { key });
-      //   cy.wait(250);
-      // }
+      for (let i: number = 0; i < 3; i++) {
+        cy.get("#main-map").type("{shift}" + key);
+        cy.wait(250);
+      }
     });
   });
 };
