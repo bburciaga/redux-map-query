@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import { getClosestExtent } from "../../../../src/helpers/geometry";
 
 declare global {
   interface Chainable {
@@ -43,3 +44,34 @@ export const b2 = () => {
       .should("have.length", 5);
   });
 };
+
+export const getClosestExtentForTest = () => {
+  let bufferedExtents: any[] = [];
+  let userBounds: any;
+
+  it("should grab buffered extent", () => {
+    cy.window()
+      .its("store")
+      .invoke("getState")
+      .its("bufferedExtents")
+      .its("data")
+      .its("features")
+      .then((val: any) => {
+        bufferedExtents = val;
+      });
+  });
+
+  it("should grab user bounds feature", () => {
+    cy.window()
+      .its("store")
+      .invoke("getState")
+      .its("userSettings")
+      .its("user_bounds")
+      .then((val: any) => {
+        userBounds = val;
+      });
+  });
+
+  const closestExtent = bufferedExtents.length > 0 ? getClosestExtent(userBounds.properties.center, bufferedExtents) : undefined;
+  return closestExtent;
+}

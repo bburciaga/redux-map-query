@@ -1,4 +1,4 @@
-import { b1 } from "../../support/commands/cases/bufferedExtents";
+import { b1, getClosestExtentForTest } from "../../support/commands/cases/bufferedExtents";
 import { z0, z1, zoomIn } from "../../support/commands/cases/zoom";
 import { bufferedExtentsTestCase } from "../../support/commands/map";
 import { getClosestExtent} from "../../../src/helpers/geometry";
@@ -46,6 +46,13 @@ describe("Special Value Testing", () => {
 
   z0();
 
+  const beforeMoveExtent = getClosestExtentForTest();
+
+  it("should see extents are undefined", () => {
+    cy.wrap(beforeMoveExtent)
+      .should("be.undefined");
+  });
+
   it("Can zoom into map with button", () => {
     zoomIn();
   });
@@ -54,43 +61,51 @@ describe("Special Value Testing", () => {
 
   b1();
 
-  it("should get values", () => {
-    let bufferedExtents: any[] = [];
-    let userBounds: any;
-    let dif: any;
-    cy.window()
-      .its("store")
-      .invoke("getState")
-      .its("bufferedExtents")
-      .its("data")
-      .its("features")
-      .then((val: any) => {
-        cy.log(val);
-        console.log("cypress extents", val);
-        bufferedExtents = val;
-      });
-    
-    cy.window()
-      .its("store")
-      .invoke("getState")
-      .its("userSettings")
-      .its("user_bounds")
-      .then((val: any) => {
-        cy.log(val);
-        console.log("cypress user", val);
-        userBounds = val;
-      });
+  const afterMoveExtent = getClosestExtentForTest();
 
-    if (bufferedExtents.length > 0) {
-      const closestExtent = getClosestExtent(userBounds.properties.center, bufferedExtents);
-      cy.log(closestExtent);
-      console.log("cypress closest", closestExtent);
-      dif = difference(userBounds, closestExtent);
-    }
-    
-    cy.wrap(dif)
-      .should("be.undefined");
+  it("should see extents are defined", () => {
+    cy.wrap(afterMoveExtent)
+      .should("not.be.null");
   });
+
+  // it("should get values", () => {
+  //   let bufferedExtents: any[] = [];
+  //   let userBounds: any;
+  //   let dif: any;
+  //   cy.window()
+  //     .its("store")
+  //     .invoke("getState")
+  //     .its("bufferedExtents")
+  //     .its("data")
+  //     .its("features")
+  //     .then((val: any) => {
+  //       cy.log(val);
+  //       console.log("cypress extents", val);
+  //       bufferedExtents = val;
+  //     });
+    
+  //   cy.window()
+  //     .its("store")
+  //     .invoke("getState")
+  //     .its("userSettings")
+  //     .its("user_bounds")
+  //     .then((val: any) => {
+  //       cy.log(val);
+  //       console.log("cypress user", val);
+  //       userBounds = val;
+  //     });
+
+  //   if (bufferedExtents.length > 0) {
+  //     const closestExtent = getClosestExtent(userBounds.properties.center, bufferedExtents);
+  //     cy.log(closestExtent);
+  //     console.log("cypress closest", closestExtent);
+  //     dif = difference(userBounds, closestExtent);
+  //   }
+    
+  //   cy.wrap(dif)
+  //     .should("be.undefined");
+  // });
+
 
   //  Case 1    z0    B0    Mn
   // keypressMoveMap("{upArrow}", 3);
