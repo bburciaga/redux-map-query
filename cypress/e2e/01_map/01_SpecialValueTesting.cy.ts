@@ -3,6 +3,8 @@ import { z0, z1, zoomIn } from "../../support/commands/cases/zoom";
 import { bufferedExtentsTestCase } from "../../support/commands/map";
 import { getClosestExtent} from "../../../src/helpers/geometry";
 import { difference } from "@turf/turf";
+import { getUserBounds } from "../../support/commands/cases/userBounds";
+import { d1 } from "../../support/commands/cases/difference";
 
 // describe("Zoom on Map", () => {
 //   it("Can zoom in once", () => {
@@ -61,12 +63,9 @@ describe("Special Value Testing", () => {
 
   b1();
 
-  const afterMoveExtent = getClosestExtentForTest();
+  const userBounds = getUserBounds();
 
-  it("should see extents are defined", () => {
-    cy.wrap(afterMoveExtent)
-      .should("not.be.null");
-  });
+  d1(userBounds, beforeMoveExtent);
 
   // it("should get values", () => {
   //   let bufferedExtents: any[] = [];

@@ -1,5 +1,6 @@
 /// <reference types="cypress" />
 import { getClosestExtent } from "../../../../src/helpers/geometry";
+import { getUserBounds } from "./userBounds";
 
 declare global {
   interface Chainable {
@@ -47,7 +48,7 @@ export const b2 = () => {
 
 export const getClosestExtentForTest = () => {
   let bufferedExtents: any[] = [];
-  let userBounds: any;
+  const userBounds: any = getUserBounds();
 
   it("should grab buffered extent", () => {
     cy.window()
@@ -58,17 +59,6 @@ export const getClosestExtentForTest = () => {
       .its("features")
       .then((val: any) => {
         bufferedExtents = val;
-      });
-  });
-
-  it("should grab user bounds feature", () => {
-    cy.window()
-      .its("store")
-      .invoke("getState")
-      .its("userSettings")
-      .its("user_bounds")
-      .then((val: any) => {
-        userBounds = val;
       });
   });
 
